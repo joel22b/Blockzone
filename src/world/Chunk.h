@@ -12,15 +12,18 @@
 class Chunk {
 private:
 	std::vector<std::vector<std::vector<Block>>> blocks;
-	glm::vec3 position;
-
+	glm::vec2 position;
+	Block_Consts* blockConsts;
+	bool render;
 
 public:
-	Chunk(glm::vec3 position = glm::vec3(0, 0, 0));
+	Chunk();
+	Chunk(glm::vec2 position, Block_Consts* blockConsts);
 	~Chunk();
 
 	void doRender(Shader shader, GLuint modelLoc);
+	bool shouldRender();
 
-	void addBlock(glm::vec3 relPos, Block_Type type, Block_Consts* blockConsts);
+	void addBlock(glm::vec3 relPos, Block_Type type);
 };
 

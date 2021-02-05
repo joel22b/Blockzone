@@ -1,8 +1,28 @@
 #include "Chunk.h"
 
-Chunk::Chunk(glm::vec3 position) {
+Chunk::Chunk() {
+	render = false;
+}
+
+Chunk::Chunk(glm::vec2 position, Block_Consts* blockConsts) {
 	blocks = std::vector<std::vector<std::vector<Block>>>(CHUNK_MAX_WIDTH, std::vector<std::vector<Block>>(CHUNK_MAX_HEIGHT, std::vector<Block>(CHUNK_MAX_WIDTH, Block())));
 	this->position = position;
+	this->blockConsts = blockConsts;
+	render = true;
+
+	addBlock(glm::vec3(0, 0, 0), GRASS);
+	addBlock(glm::vec3(1, 0, 0), GRASS);
+	addBlock(glm::vec3(0, 0, 1), GRASS);
+	addBlock(glm::vec3(1, 0, 1), DIRT);
+	addBlock(glm::vec3(2, 0, 1), GRASS);
+	addBlock(glm::vec3(1, 0, 2), GRASS);
+	addBlock(glm::vec3(1, 1, 1), DIRT);
+	addBlock(glm::vec3(1, 2, 1), GRASS);
+
+	addBlock(glm::vec3(7, 0, 0), GRASS);
+	addBlock(glm::vec3(8, 0, 0), GRASS);
+
+	addBlock(glm::vec3(15, 0, 0), GRASS);
 }
 
 Chunk::~Chunk() {
@@ -14,15 +34,19 @@ void Chunk::doRender(Shader shader, GLuint modelLoc) {
 		for (int j = 0; j < blocks[i].size(); j++) {
 			for (int k = 0; k < blocks[i][j].size(); k++) {
 				if (blocks[i][j][k].getUpdate()) {
-					blocks[i][j][k].doRender(shader, modelLoc, position + glm::vec3(i, j, k));
+					blocks[i][j][k].doRender(shader, modelLoc, glm::vec3(position.x, 0, position.y) + glm::vec3(i, j, k));
 				}
 			}
 		}
 	}
 }
 
+bool Chunk::shouldRender() {
+	return this->render;
+}
 
-void Chunk::addBlock(glm::vec3 relPos, Block_Type type, Block_Consts* blockConsts) {
+
+void Chunk::addBlock(glm::vec3 relPos, Block_Type type) {
 	blocks[(int)relPos.x][(int)relPos.y][(int)relPos.z] = Block(blockConsts, type, type != AIR, false);
 
 	// Update render for itself and surrounding blocks

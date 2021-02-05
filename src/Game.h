@@ -7,17 +7,14 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Camera.h"
-#include "world/Chunk.h"
-#include "world/block/Block_Consts.h"
+#include "world/World.h"
 #include "../Textures/Texture_Loader.h"
 
 class Game {
 private:
 	//Camera camera;
 	Texture_Loader* textureLoader;
-	Block_Consts* blockConsts;
-	//std::vector<std::vector<Chunk>> chunks;
-	Chunk chunk = Chunk();
+	World world;
 
 	void loadTextures();
 

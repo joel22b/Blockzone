@@ -3,18 +3,9 @@
 Game::Game() {
 	//camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 	textureLoader = new Texture_Loader();
-	blockConsts = new Block_Consts(textureLoader);
-
 	loadTextures();
 
-	chunk.addBlock(glm::vec3(0, 0, 0), GRASS, blockConsts);
-	chunk.addBlock(glm::vec3(1, 0, 0), GRASS, blockConsts);
-	chunk.addBlock(glm::vec3(0, 0, 1), GRASS, blockConsts);
-	chunk.addBlock(glm::vec3(1, 0, 1), DIRT, blockConsts);
-	chunk.addBlock(glm::vec3(2, 0, 1), GRASS, blockConsts);
-	chunk.addBlock(glm::vec3(1, 0, 2), GRASS, blockConsts);
-	chunk.addBlock(glm::vec3(1, 1, 1), DIRT, blockConsts);
-	chunk.addBlock(glm::vec3(1, 2, 1), GRASS, blockConsts);
+	world = World(textureLoader);
 }
 
 Game::~Game() {
@@ -29,12 +20,7 @@ void Game::doUpdate() {
 }
 
 void Game::doRender(Shader shader, GLint modelLoc) {
-	chunk.doRender(shader, modelLoc);
-	/*for (int i = 0; i < chunks.size(); i++) {
-		for (int j = 0; j < chunks[i].size(); j++) {
-			chunks[i][j].doRender(shader, modelLoc);
-		}
-	}*/
+	world.doRender(shader, modelLoc);
 }
 
 void Game::loadTextures() {
