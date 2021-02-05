@@ -8,9 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "src/Mesh.h"
-#include "Textures/Texture_Loader.h"
-#include "src/world/block/Block_Consts.h"
+#include "../../Mesh.h"
+#include "../../../Textures/Texture_Loader.h"
+#include "Block_Consts.h"
 
 class Block {
 private:

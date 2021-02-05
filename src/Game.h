@@ -7,9 +7,9 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Camera.h"
-#include "Chunk.h"
-#include "src/world/block/Block_Consts.h"
-#include "Textures/Texture_Loader.h"
+#include "world/Chunk.h"
+#include "world/block/Block_Consts.h"
+#include "../Textures/Texture_Loader.h"
 
 class Game {
 private:

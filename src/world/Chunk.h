@@ -4,10 +4,10 @@
 
 #include "glm/glm.hpp"
 
-#include "src/world/block/Block_Consts.h"
-#include "src/world/Chunk_Consts.h"
-#include "Block.h"
-#include "Textures/Texture_Loader.h"
+#include "block/Block_Consts.h"
+#include "Chunk_Consts.h"
+#include "block/Block.h"
+#include "../../Textures/Texture_Loader.h"
 
 class Chunk {
 private:

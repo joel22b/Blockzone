@@ -16,8 +16,8 @@
 
 // Other includes
 #include "Shaders/Shader.h"
-#include "Camera.h"
-#include "Game.h"
+#include "src/Camera.h"
+#include "src/Game.h"
 
 // Window dimensions
 const GLint WIDTH = 800, HEIGHT = 600;
