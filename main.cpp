@@ -20,7 +20,7 @@
 #include "src/Game.h"
 
 // Window dimensions
-const GLint WIDTH = 800, HEIGHT = 600;
+const GLint WIDTH = 1600, HEIGHT = 800;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -99,6 +99,19 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        /*double lastTime = glfwGetTime();
+        int nbFrames = 0;
+
+        // Measure speed
+        double currentTime = glfwGetTime();
+        nbFrames++;
+        if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
+            // printf and reset timer
+            printf("%f ms/frame\n", 1000.0 / double(nbFrames));
+            nbFrames = 0;
+            lastTime += 1.0;
+        }*/
+
         glfwPollEvents();
         DoMovement();
 
@@ -106,28 +119,12 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Do drawing here
-        lightingShader.Use();
-        GLint viewPosLoc = glGetUniformLocation(lightingShader.getProgram(), "viewPos");
-        glUniform3f(viewPosLoc, camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
-        
-        // Directional Light
-        GLint lightDirLoc = glGetUniformLocation(lightingShader.getProgram(), "dirLight.direction");
-        glUniform3f(lightDirLoc, 1.0f, 10.0f, -3.0f);
-        glUniform3f(glGetUniformLocation(lightingShader.getProgram(), "dirLight.ambient"), 0.5f, 0.5f, 0.5f);
-        glUniform3f(glGetUniformLocation(lightingShader.getProgram(), "dirLight.diffuse"), 1.0f, 1.0f, 1.0f);
-        glUniform3f(glGetUniformLocation(lightingShader.getProgram(), "dirLight.specular"), 1.0f, 1.0f, 1.0f);
-
         glm::mat4 view(1);
         view = camera.getViewMatrix();
 
-        GLint modelLoc = glGetUniformLocation(lightingShader.getProgram(), "model");
-        GLint viewLoc = glGetUniformLocation(lightingShader.getProgram(), "view");
-        GLint projectionLoc = glGetUniformLocation(lightingShader.getProgram(), "projection");
+        game.doUpdate(camera.getPosition(), projection, view);
 
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-        game.doRender(lightingShader, modelLoc);
+        game.doRender();
         // Drawing done above
 
         glfwSwapBuffers(window);

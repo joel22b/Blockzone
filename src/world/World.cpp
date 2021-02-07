@@ -3,10 +3,28 @@
 World::World() {}
 
 World::World(Texture_Loader* textureLoader) {
-	blockConsts = new Block_Consts(textureLoader);
+	blockConsts = new Block_Consts();
 
-	addChunk(0, 0);
-	addChunk(1, 0);
+	for (int i = 0; i < 16; i++) {
+		for (int j = 0; j < 16; j++) {
+			addChunk(i, j);
+		}
+	}
+
+	std::vector<Texture> blockTextures = textureLoader->getDiffAndSpecTextures("blocks");
+	for (int i = 0; i < chunks.size(); i++) {
+		for (int j = 0; j < chunks[i].size(); j++) {
+			generateChunk(chunks[i][j], blockTextures);
+		}
+	}
+
+	for (int i = 0; i < chunks.size(); i++) {
+		for (int j = 0; j < chunks[i].size(); j++) {
+			chunks[i][j].doUpdate(blockTextures, blockConsts, (i != chunks.size() - 1) ? &chunks[i + 1][j] : nullptr,
+				(i != 0) ? &chunks[i - 1][j] : nullptr, (j != chunks[i].size() - 1) ? &chunks[i][j + 1] : nullptr,
+				(j != 0) ? &chunks[i][j - 1] : nullptr);
+		}
+	}
 }
 
 World::~World() {
@@ -30,10 +48,35 @@ void World::addChunk(int xPos, int zPos) {
 	}
 	else if (xPos == chunks.size()) {
 		chunks.push_back(std::vector<Chunk>(zPos));
-		chunks[xPos].push_back(Chunk(glm::vec2(xPos * CHUNK_MAX_WIDTH, zPos * CHUNK_MAX_WIDTH), blockConsts));
+		chunks[xPos].push_back(Chunk(xPos * CHUNK_MAX_WIDTH, zPos * CHUNK_MAX_WIDTH));
+	}
+	else if (zPos > chunks[xPos].size()) {
+		std::cout << "ERROR::WORLD::CHUNK_OUT_OF_RANGE::Z_POS" << std::endl;
+		std::cout << "\tzPos: " << zPos << " chunks size: " << chunks[xPos].size() << std::endl;
+	}
+	else if (zPos == chunks[xPos].size()) {
+		chunks[xPos].push_back(Chunk(xPos * CHUNK_MAX_WIDTH, zPos * CHUNK_MAX_WIDTH));
 	}
 	else {
 		std::cout << "ERROR::WORLD::CHUNK_ALREADY_EXISTS" << std::endl;
 		std::cout << "\txPos: " << xPos << " zPos: " << zPos << std::endl;
+	}
+}
+
+void World::generateChunk(Chunk &chunk, std::vector<Texture> blockTextures) {
+	for (int x = 0; x < CHUNK_MAX_WIDTH; x++) {
+		for (int z = 0; z < CHUNK_MAX_WIDTH; z++) {
+			// Get noise value (Between -1 and 1)
+			float heightValue = glm::simplex(glm::vec2((chunk.getXPos() + x) / 24.0f, (chunk.getZPos() + z)/ 24.0f));
+
+			// Make noise value between 0 and 2
+			heightValue = (heightValue + 1) * 5;
+			int y = roundf(heightValue);
+
+			chunk.addBlock(glm::vec3(x, y, z), GRASS);
+			for (int i = 0; i < y; i++) {
+				chunk.addBlock(glm::vec3(x, i, z), DIRT);
+			}
+		}
 	}
 }

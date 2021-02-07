@@ -1,8 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <math.h>
 
 #include "glm/glm.hpp"
+#include "glm/gtc/noise.hpp"
 
 #include "Chunk.h"
 #include "Chunk_Consts.h"
@@ -22,4 +24,6 @@ private:
 	Block_Consts* blockConsts;
 
 	void addChunk(int xPos, int zPos);
+
+	void generateChunk(Chunk &chunk, std::vector<Texture> blockTextures);
 };

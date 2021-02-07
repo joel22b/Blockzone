@@ -1,7 +1,8 @@
 #pragma once
 
 #include <iostream>
-#include <vector>
+#include <ostream>
+#include <unordered_map>
 
 #include "glm/glm.hpp"
 
@@ -25,196 +26,35 @@ enum Block_Side {
 
 class Block_Consts {
 public:
-	Mesh meshs[6];
 
-	Block_Consts() {}
-
-	Block_Consts(Texture_Loader* textureLoader) {
-		this->textureLoader = textureLoader;
-
-		std::vector<Vertex> vertices;
-		std::vector<GLuint> indices;
-
-		Vertex vertex;
-		// XPOS
-		vertex.Position = glm::vec3(1.0f, 0.0f, 0.0f);
-		vertex.Normal = glm::vec3(1.0f, 0.0f, 0.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(1.0f, 0.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(1.0f, 1.0f, 0.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(1.0f, 1.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		indices.push_back(0);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(3);
-
-		this->meshs[0] = Mesh(vertices, indices);
-		vertices.clear();
-		indices.clear();
-
-		// XNEG
-		vertex.Position = glm::vec3(0.0f, 0.0f, 0.0f);
-		vertex.Normal = glm::vec3(-1.0f, 0.0f, 0.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(0.0f, 0.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(0.0f, 1.0f, 0.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(0.0f, 1.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		indices.push_back(0);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(3);
-
-		this->meshs[1] = Mesh(vertices, indices);
-		vertices.clear();
-		indices.clear();
-
-		// YPOS
-		vertex.Position = glm::vec3(0.0f, 1.0f, 0.0f);
-		vertex.Normal = glm::vec3(0.0f, 0.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(1.0f, 1.0f, 0.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(0.0f, 1.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(1.0f, 1.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		indices.push_back(0);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(3);
-
-		this->meshs[2] = Mesh(vertices, indices);
-		vertices.clear();
-		indices.clear();
-
-		// YNEG
-		vertex.Position = glm::vec3(0.0f, 0.0f, 0.0f);
-		vertex.Normal = glm::vec3(0.0f, -1.0f, 0.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(1.0f, 0.0f, 0.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(0.0f, 0.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(1.0f, 0.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		indices.push_back(0);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(3);
-
-		this->meshs[3] = Mesh(vertices, indices);
-		vertices.clear();
-		indices.clear();
-
-		// ZPOS
-		vertex.Position = glm::vec3(0.0f, 0.0f, 1.0f);
-		vertex.Normal = glm::vec3(0.0f, 0.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(1.0f, 0.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(0.0f, 1.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(1.0f, 1.0f, 1.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		indices.push_back(0);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(3);
-
-		this->meshs[4] = Mesh(vertices, indices);
-		vertices.clear();
-		indices.clear();
-
-		// ZNEG
-		vertex.Position = glm::vec3(0.0f, 0.0f, 0.0f);
-		vertex.Normal = glm::vec3(0.0f, 0.0f, -1.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(1.0f, 0.0f, 0.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 1.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(0.0f, 1.0f, 0.0f);
-		vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		vertex.Position = glm::vec3(1.0f, 1.0f, 0.0f);
-		vertex.TexCoords = glm::vec2(1.0f, 0.0f);
-		vertices.push_back(vertex);
-
-		indices.push_back(0);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(1);
-		indices.push_back(2);
-		indices.push_back(3);
-
-		this->meshs[5] = Mesh(vertices, indices);
-		vertices.clear();
-		indices.clear();
+	Block_Consts() {
+		loadBlockTexCoords();
 	}
 
-	std::vector<Texture> loadTextures(std::string prefix) {
-		return textureLoader->getDiffAndSpecTextures(prefix);
+	glm::vec2 getBlockTexCoords(Block_Type type, Block_Side dir) {
+		std::ostringstream query;
+		query << type << "_" << dir;
+		return blockTexCoords[query.str()];
 	}
 
 private:
-	Texture_Loader* textureLoader;
+	std::unordered_map<std::string, glm::vec2> blockTexCoords;
+
+	void loadBlockTexCoords() {
+		// GRASS
+		blockTexCoords["1_0"] = glm::vec2(1.0f / 3.0f, 0.0f);
+		blockTexCoords["1_1"] = glm::vec2(1.0f / 3.0f, 0.0f);
+		blockTexCoords["1_2"] = glm::vec2(0.0f / 3.0f, 0.0f);
+		blockTexCoords["1_3"] = glm::vec2(2.0f / 3.0f, 0.0f);
+		blockTexCoords["1_4"] = glm::vec2(1.0f / 3.0f, 0.0f);
+		blockTexCoords["1_5"] = glm::vec2(1.0f / 3.0f, 0.0f);
+		
+		// DIRT
+		blockTexCoords["2_0"] = glm::vec2(2.0f / 3.0f, 0.0f);
+		blockTexCoords["2_1"] = glm::vec2(2.0f / 3.0f, 0.0f);
+		blockTexCoords["2_2"] = glm::vec2(2.0f / 3.0f, 0.0f);
+		blockTexCoords["2_3"] = glm::vec2(2.0f / 3.0f, 0.0f);
+		blockTexCoords["2_4"] = glm::vec2(2.0f / 3.0f, 0.0f);
+		blockTexCoords["2_5"] = glm::vec2(2.0f / 3.0f, 0.0f);
+	}
 };
