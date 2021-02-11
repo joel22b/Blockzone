@@ -19,11 +19,14 @@ public:
 
 	void doRender(Shader shader, GLint modelLoc);
 
+	Chunk* getChunk(int xPos, int zPos);
+	Block* getBlock(int xPos, int yPos, int zPos);
+
 private:
 	std::vector<std::vector<Chunk>> chunks;
 	Block_Consts* blockConsts;
 
 	void addChunk(int xPos, int zPos);
 
-	void generateChunk(Chunk &chunk, std::vector<Texture> blockTextures);
+	void generateChunk(Chunk &chunk);
 };

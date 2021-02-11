@@ -40,4 +40,6 @@
 *.vs
 
 Debug/
+Release/
 SOIL2/
+Freetype2/

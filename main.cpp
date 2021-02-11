@@ -18,6 +18,7 @@
 #include "Shaders/Shader.h"
 #include "src/Camera.h"
 #include "src/Game.h"
+#include "src/Text.h"
 
 // Window dimensions
 const GLint WIDTH = 1600, HEIGHT = 800;
@@ -25,18 +26,22 @@ int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow* window, double xPos, double yPos);
-void DoMovement();
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-GLfloat lastX = WIDTH / 2.0;
-GLfloat lastY = HEIGHT / 2.0;
-bool keys[1024];
-bool firstMouse = true;
+//Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 
+int nbFrames = 0;
+double currentTime;
+double lastTime = glfwGetTime();
+std::string mspfText = "test", fpsText = "test";
+
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
+Game* game;
+
+Text arialText;
 
 int main() {
     glfwInit();
@@ -79,104 +84,61 @@ int main() {
 
     glEnable(GL_DEPTH_TEST);
 
+    //glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Shader lightingShader("Shaders\\lighting.vs", "Shaders\\lighting.frag");
+    game = new Game(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    lightingShader.Use();
-    glUniform1i(glGetUniformLocation(lightingShader.getProgram(), "material.diffuse"), 0);
-    glUniform1i(glGetUniformLocation(lightingShader.getProgram(), "material.specular"), 1);
-
-    glm::mat4 projection(1);
-    projection = glm::perspective(camera.getZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 1000.0f);
-
-    Game game = Game();
+    arialText = Text("Freetype2/Fonts/arial.ttf", 20);
 
     // Main program loop
     while (!glfwWindowShouldClose(window)) {
+        // Get time since last frame
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        /*double lastTime = glfwGetTime();
-        int nbFrames = 0;
-
-        // Measure speed
-        double currentTime = glfwGetTime();
+        // Get framerate and ms per frame
+        currentTime = glfwGetTime();
         nbFrames++;
-        if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
-            // printf and reset timer
-            printf("%f ms/frame\n", 1000.0 / double(nbFrames));
+        if (currentTime - lastTime >= (double)1.0) {
+            double mspf = 1000.0 / double(nbFrames);
+            mspfText = "ms per frame: " + to_string(mspf);
+            fpsText = "fps: " + to_string(1000.0 / mspf);
             nbFrames = 0;
             lastTime += 1.0;
-        }*/
+        }
 
         glfwPollEvents();
-        DoMovement();
+        game->doInput(deltaTime);
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Do drawing here
-        glm::mat4 view(1);
-        view = camera.getViewMatrix();
+        game->doUpdate();
 
-        game.doUpdate(camera.getPosition(), projection, view);
+        game->doRender(&arialText);
 
-        game.doRender();
+        arialText.RenderText(mspfText, 25.0f, 50.0f, 1.0f, glm::vec3(1, 1, 1));
+        arialText.RenderText(fpsText, 25.0f, 25.0f, 1.0f, glm::vec3(1, 1, 1));
         // Drawing done above
 
         glfwSwapBuffers(window);
     }
 
     // If here, program is exiting
+    delete game;
+
     glfwTerminate();
 
     return EXIT_SUCCESS;
 }
 
-void DoMovement() {
-    if (keys[GLFW_KEY_W]) {
-        camera.processKeyboard(FORWARD, deltaTime);
-    }
-    if (keys[GLFW_KEY_S]) {
-        camera.processKeyboard(BACKWARD, deltaTime);
-    }
-    if (keys[GLFW_KEY_A]) {
-        camera.processKeyboard(LEFT, deltaTime);
-    }
-    if (keys[GLFW_KEY_D]) {
-        camera.processKeyboard(RIGHT, deltaTime);
-    }
-}
-
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GL_TRUE);
-    }
-    if (key >= 0 && key < 1024) {
-        if (action == GLFW_PRESS) {
-            keys[key] = true;
-        }
-        else if (action == GLFW_RELEASE) {
-            keys[key] = false;
-        }
-    }
+    game->keyCallback(window, key, scancode, action, mode);
 }
 
 void MouseCallback(GLFWwindow* window, double xPos, double yPos) {
-    if (firstMouse) {
-        lastX = xPos;
-        lastY = yPos;
-        firstMouse = false;
-    }
-
-    GLfloat xOffset = xPos - lastX;
-    GLfloat yOffset = lastY - yPos;
-
-    lastX = xPos;
-    lastY = yPos;
-
-    camera.processMouseMovement(xOffset, yOffset);
+    game->mouseCallback(window, xPos, yPos);
 }

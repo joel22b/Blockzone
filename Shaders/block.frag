@@ -27,7 +27,7 @@ uniform DirLight dirLight;
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 
 void main() {
-	vec3 norm = normalize(normal);
+	vec3 norm = normalize(-normal);
 	vec3 viewDir = normalize(viewPos - fragPos);
 
 	// Directional light

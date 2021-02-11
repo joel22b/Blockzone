@@ -2,6 +2,10 @@
 
 #include <vector>
 
+#define GLEW_STATIC
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -10,8 +14,9 @@
 #include "../Shaders/Shader.h"
 #include "world/World.h"
 #include "../Textures/Texture_Loader.h"
+#include "Text.h"
 
-#include "Chunk_Mesh.h"
+#include "entity/player/Player.h"
 
 class Game {
 private:
@@ -20,17 +25,27 @@ private:
 	Texture_Loader* textureLoader;
 	World world;
 
-	Chunk_Mesh chunkMesh;
+	Player* player;
 
-	void loadShaders();
+	bool keys[1024] = { false };
+	GLfloat lastX;
+	GLfloat lastY;
+	bool firstMouse = true;
+
+	void loadShaders(int screenWidth, int screenHeight);
 	void loadTextures();
 
 public:
-	Game();
+	Game(int screenWidth, int screenHeight);
 	~Game();
 
-	void doInput();
-	void doUpdate(glm::vec3 viewPos, glm::mat4 projection, glm::mat4 view);
-	void doRender();
+	void doInput(GLfloat deltaTime);
+	void doUpdate();
+	void doRender(Text* text);
+
+	void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+	void mouseCallback(GLFWwindow* window, double xPos, double yPos);
+
+	void updateProjection(GLfloat fov, int screenWidth, int screenHeight);
 };
 

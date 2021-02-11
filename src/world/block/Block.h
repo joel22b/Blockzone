@@ -21,5 +21,6 @@ public:
 	~Block();
 
 	Block_Type getType();
+	void setType(Block_Type type);
 };
 

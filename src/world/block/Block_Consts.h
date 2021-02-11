@@ -24,10 +24,13 @@ enum Block_Side {
 	ZNEG = 5
 };
 
+const int BLOCK_WIDTH = 1;
+
 class Block_Consts {
 public:
 
-	Block_Consts() {
+	Block_Consts(std::vector<Texture> blockTextures) {
+		this->blockTextures = blockTextures;
 		loadBlockTexCoords();
 	}
 
@@ -37,7 +40,12 @@ public:
 		return blockTexCoords[query.str()];
 	}
 
+	std::vector<Texture> getBlockTextures() {
+		return blockTextures;
+	}
+
 private:
+	std::vector<Texture> blockTextures;
 	std::unordered_map<std::string, glm::vec2> blockTexCoords;
 
 	void loadBlockTexCoords() {

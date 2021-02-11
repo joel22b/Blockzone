@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -8,12 +9,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-enum Camera_Movement {
+/*enum Camera_Movement {
 	FORWARD,
 	BACKWARD,
 	LEFT,
 	RIGHT
-};
+};*/
 
 const GLfloat YAW = -90.0f;
 const GLfloat PITCH = 0.0f;
@@ -45,6 +46,8 @@ private:
 		this->front = glm::normalize(front);
 		this->right = glm::normalize(glm::cross(this->front, this->worldUp));
 		this->up = glm::normalize(glm::cross(this->right, this->front));
+		std::cout << "Ran update camera vectors" << std::endl;
+		std::cout << "\tYaw: " << yaw << " Pitch: " << pitch << std::endl;
 	}
 
 public:
@@ -78,7 +81,7 @@ public:
 		return front;
 	}
 
-	void processKeyboard(Camera_Movement direction, GLfloat deltaTime) {
+	/*void processKeyboard(Camera_Movement direction, GLfloat deltaTime) {
 		GLfloat velocity = this->movementSpeed * deltaTime;
 
 		if (direction == FORWARD) {
@@ -93,7 +96,7 @@ public:
 		if (direction == RIGHT) {
 			this->position += this->right * velocity;
 		}
-	}
+	}*/
 
 	void processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLboolean constrainPitch = true) {
 		xOffset *= this->mouseSensitivity;
@@ -123,6 +126,13 @@ public:
 
 	glm::vec3 getPosition() {
 		return this->position;
+	}
+
+	void setCameraVectors(glm::vec3 position, glm::vec3 front, glm::vec3 right, glm::vec3 up) {
+		this->position = position;
+		this->front = front;
+		this->right = right;
+		this->up = up;
 	}
 };
 

@@ -15,20 +15,21 @@ class Chunk {
 private:
 	std::vector<std::vector<std::vector<Block>>> blocks;
 	Chunk_Mesh chunkMesh;
+	Block_Consts* blockConsts;
 	int xPos, zPos;
 	bool render;
 
 public:
 	Chunk();
-	Chunk(int xPos, int zPos);
+	Chunk(Block_Consts* blockConsts, int xPos, int zPos);
 	~Chunk();
 
-	void doUpdate(std::vector<Texture> blockTextures, Block_Consts* blockConsts, Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG);
+	void doUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG);
 	void doRender(Shader shader, GLuint modelLoc);
 	bool shouldRender();
 
 	void addBlock(glm::vec3 relPos, Block_Type type);
-	Block getBlock(int x, int y, int z);
+	Block* getBlock(int x, int y, int z);
 
 	int getXPos();
 	int getZPos();

@@ -11,3 +11,7 @@ Block::~Block() {
 Block_Type Block::getType() {
 	return this->type;
 }
+
+void Block::setType(Block_Type type) {
+	this->type = type;
+}
