@@ -28,7 +28,7 @@ Entity::~Entity() {
 void Entity::doUpdate() {
 	// Update velocity
 	if (!flying) {
-		this->velocity -= this->worldUp * 0.001f;	// Gravity
+		this->velocity -= this->worldUp * 0.0005f;	// Gravity
 
 		this->potentialPos += this->velocity;
 
