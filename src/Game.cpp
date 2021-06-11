@@ -30,6 +30,11 @@ void Game::doInput(GLfloat deltaTime) {
 	}
 	if (keys[GLFW_KEY_SPACE]) {
 		player->processKeyboardInput(JUMP, deltaTime);
+		keys[GLFW_KEY_SPACE] = false;
+	}
+	if (keys[GLFW_KEY_F]) {
+		player->processKeyboardInput(FLY_TOGGLE, deltaTime);
+		keys[GLFW_KEY_F] = false;
 	}
 }
 

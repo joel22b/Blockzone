@@ -14,13 +14,14 @@ enum Player_Movement {
 	BACKWARD,
 	LEFT,
 	RIGHT,
-	JUMP
+	JUMP,
+	FLY_TOGGLE
 };
 
 class Player: public Entity {
 public:
 	Player();
-	Player(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw = 0.0f, GLfloat pitch = 0.0f, bool flying = true, float speed = 6.0f);
+	Player(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw = 0.0f, GLfloat pitch = 0.0f, bool flying = true, float speed = 6.0f, float jumpSpeed = 0.05f);
 
 	void processKeyboardInput(Player_Movement movement, GLfloat deltaTime);
 	void processMouseInput(GLfloat xOffset, GLfloat yOffset, GLboolean constrainPitch = true);

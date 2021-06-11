@@ -4,7 +4,7 @@ Entity::Entity() {
 
 }
 
-Entity::Entity(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw, GLfloat pitch, bool flying, float speed) {
+Entity::Entity(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw, GLfloat pitch, bool flying, float speed, float jumpSpeed) {
 	this->world = world;
 	this->position = position;
 	this->dimentions = dimentions;
@@ -12,8 +12,11 @@ Entity::Entity(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat y
 	this->yaw = yaw;
 	this->pitch = pitch;
 	this->speed = speed;
+	this->jumpSpeed = jumpSpeed;
 	this->potentialPos = position;
 	this->flying = flying;
+
+	velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	updateVectors();
 }
@@ -23,9 +26,17 @@ Entity::~Entity() {
 }
 
 void Entity::doUpdate() {
-	// Gravity
+	// Update velocity
 	if (!flying) {
-		potentialPos.y -= 0.01f;
+		this->velocity -= this->worldUp * 0.001f;	// Gravity
+
+		this->potentialPos += this->velocity;
+
+		velocity.x = velocity.x * 0.9f;
+		velocity.z = velocity.z * 0.9f;
+	}
+	else {
+		this->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	}
 
 	// Collision Detection
@@ -76,16 +87,15 @@ void Entity::doUpdate() {
 				collided = true;
 				if (side == 0) {
 					potentialPos.x = position.x;
+					velocity.x = 0.0f;
 				}
 				else if (side == 1) {
 					potentialPos.y = position.y;
+					velocity.y = 0.0f;
 				}
 				else {
 					potentialPos.z = position.z;
-				}
-				if (block->getType() != DIRT) {
-					block->setType(DIRT);
-					world->getChunk(posInt.x, posInt.z)->doUpdate(nullptr, nullptr, nullptr, nullptr);
+					velocity.z = 0.0f;
 				}
 			}
 		}
