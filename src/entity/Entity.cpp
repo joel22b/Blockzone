@@ -4,7 +4,7 @@ Entity::Entity() {
 
 }
 
-Entity::Entity(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw, GLfloat pitch, float speed) {
+Entity::Entity(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw, GLfloat pitch, bool flying, float speed) {
 	this->world = world;
 	this->position = position;
 	this->dimentions = dimentions;
@@ -13,6 +13,7 @@ Entity::Entity(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat y
 	this->pitch = pitch;
 	this->speed = speed;
 	this->potentialPos = position;
+	this->flying = flying;
 
 	updateVectors();
 }
@@ -22,31 +23,76 @@ Entity::~Entity() {
 }
 
 void Entity::doUpdate() {
-	/*Block* block = world->getBlock(position.x, position.y - 1, position.z);
-	if (block != nullptr && block->getType() == AIR) {
-		block->setType(DIRT);
-		world->getChunk(position.x, position.z)->doUpdate(world->getChunk(position.x + 16, position.z), world->getChunk(position.x - 16, position.z),
-			world->getChunk(position.x, position.z + 16), world->getChunk(position.x, position.z - 16));
-	}*/
-	for (int x = glm::floor(position.x) - 1; x < glm::floor(position.x) + 2; x++) {
-		for (int z = glm::floor(position.z) - 1; z < glm::floor(position.z) + 2; z++) {
-			//std::cout << "X: " << x << " Z: " << z << std::endl;
-			glm::vec3 blockPos = glm::vec3(x, glm::floor(position.y) - 1, z);
-			Block* block = world->getBlock(blockPos.x, blockPos.y, blockPos.z);
-			if (block != nullptr) {
-				if (block->getType() != AIR) {
-					if (collisionDetection.cubeToRect(glm::vec2(potentialPos.x - (dimentions.x / 2), potentialPos.x + (dimentions.x / 2)), glm::vec2(potentialPos.z - (dimentions.z / 2), potentialPos.z + (dimentions.z / 2)),
-						glm::vec2(potentialPos.y, potentialPos.y + dimentions.y), glm::vec2(blockPos.x, blockPos.x + 1), glm::vec2(blockPos.z, blockPos.z + 1), blockPos.y + 1)) {
-						potentialPos.y = position.y;
-						std::cout << "Collision x:" << blockPos.x << " y: " << blockPos.y << " z: " << blockPos.z << std::endl;
-					}
+	// Gravity
+	if (!flying) {
+		potentialPos.y -= 0.01f;
+	}
+
+	// Collision Detection
+	glm::vec2 entityPos[] = { glm::vec2(potentialPos.x - (dimentions.x / 2), potentialPos.x + (dimentions.x / 2)),
+		glm::vec2(potentialPos.y, potentialPos.y + dimentions.y), glm::vec2(potentialPos.z - (dimentions.z / 2), potentialPos.z + (dimentions.z / 2)) };
+	bool collided = false;
+	glm::vec3 posInt = glm::vec3(glm::floor(position.x), glm::floor(position.y), glm::floor(position.z));
+
+	glm::vec4 collisionPosFaces[] = {
+		glm::vec4(-1, 0, 0, XPOS), glm::vec4(-1, 1, 0, XPOS),
+
+		glm::vec4(1, 0, 0, XNEG), glm::vec4(1, 1, 0, XNEG),
+
+		glm::vec4(0, -1, 0, YPOS), glm::vec4(1, -1, 0, YPOS),
+
+		glm::vec4(-1, -1, 0, YPOS), glm::vec4(0, -1, 1, YPOS),
+
+		glm::vec4(0, -1, -1, YPOS),
+
+		glm::vec4(0, 2, 0, YNEG),
+
+		glm::vec4(0, 0, -1, ZPOS), glm::vec4(0, 1, -1, ZPOS),
+
+		glm::vec4(0, 0, 1, ZNEG), glm::vec4(0, 1, 1, ZNEG)
+	};
+
+	for (int i = 0; i < 14; i++) {
+		Block* block = world->getBlock(posInt.x + collisionPosFaces[i].x, posInt.y + collisionPosFaces[i].y, posInt.z + collisionPosFaces[i].z);
+
+		if (block != nullptr && block->getType() != AIR) {
+			glm::vec2 blockPos[] = {
+				glm::vec2(posInt.x + collisionPosFaces[i].x, posInt.x + collisionPosFaces[i].x + 1),
+				glm::vec2(posInt.y + collisionPosFaces[i].y, posInt.y + collisionPosFaces[i].y + 1),
+				glm::vec2(posInt.z + collisionPosFaces[i].z, posInt.z + collisionPosFaces[i].z + 1)
+			};
+
+			int blockPoint;
+			int side = collisionPosFaces[i].w / 2;
+			if ((int)collisionPosFaces[i].w % 2 == 0) {
+				blockPoint = blockPos[side].y;
+			}
+			else {
+				blockPoint = blockPos[side].x;
+			}
+
+			if (collisionDetection.cubeToRect(entityPos[(side + 1) % 3], entityPos[(side + 2) % 3], entityPos[side % 3],
+				blockPos[(side + 1) % 3], blockPos[(side + 2) % 3], blockPoint)) {
+				collided = true;
+				if (side == 0) {
+					potentialPos.x = position.x;
+				}
+				else if (side == 1) {
+					potentialPos.y = position.y;
+				}
+				else {
+					potentialPos.z = position.z;
+				}
+				if (block->getType() != DIRT) {
+					block->setType(DIRT);
+					world->getChunk(posInt.x, posInt.z)->doUpdate(nullptr, nullptr, nullptr, nullptr);
 				}
 			}
 		}
 	}
+
 	position = potentialPos;
 	updateVectors();
-	//return output.str();
 }
 
 glm::vec3 Entity::getPosition() {

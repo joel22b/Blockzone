@@ -46,8 +46,6 @@ private:
 		this->front = glm::normalize(front);
 		this->right = glm::normalize(glm::cross(this->front, this->worldUp));
 		this->up = glm::normalize(glm::cross(this->right, this->front));
-		std::cout << "Ran update camera vectors" << std::endl;
-		std::cout << "\tYaw: " << yaw << " Pitch: " << pitch << std::endl;
 	}
 
 public:

@@ -15,7 +15,7 @@
 class Entity {
 public:
 	Entity();
-	Entity(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw = 0.0f, GLfloat pitch = 0.0f, float speed = 6.0f);
+	Entity(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw = 0.0f, GLfloat pitch = 0.0f, bool flying = false, float speed = 6.0f);
 	~Entity();
 
 	void doUpdate();
@@ -26,10 +26,11 @@ public:
 protected:
 	World* world;
 
-	glm::vec3 position, dimentions, front, worldUp, up, right;
+	glm::vec3 position, dimentions, front, frontHor, worldUp, up, right;
 	glm::vec3 potentialPos;
 	GLfloat yaw, pitch;
 	float speed;
+	bool flying;
 
 	Collision_Detection collisionDetection;
 

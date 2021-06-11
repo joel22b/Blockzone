@@ -4,7 +4,7 @@ Player::Player() : Entity() {
 	camera = nullptr;
 }
 
-Player::Player(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw, GLfloat pitch, float speed) : Entity(world, position, dimentions, yaw, pitch, speed) {
+Player::Player(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw, GLfloat pitch, bool flying, float speed) : Entity(world, position, dimentions, yaw, pitch, flying, speed) {
 	camera = new Camera(position);
 	camera->setCameraVectors(position + glm::vec3(0, 1, 0), front, right, up);
 }
@@ -25,7 +25,7 @@ void Player::processKeyboardInput(Player_Movement movement, GLfloat deltaTime) {
 		this->potentialPos += this->right * velocity;
 	}
 	if (movement == JUMP) {
-		position = potentialPos;
+		this->flying = !flying;
 	}
 }
 
