@@ -23,7 +23,7 @@ private:
 	//Camera camera;
 	Shader blockShader;
 	Texture_Loader* textureLoader;
-	World world;
+	World* world;
 
 	Player* player;
 

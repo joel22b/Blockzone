@@ -29,20 +29,31 @@ class Chunk_Mesh
 {
 public:
     /*  Functions  */
-    Chunk_Mesh() {}
+    Chunk_Mesh() {
+        this->readyToRender = false;
+    }
 
     // Constructor
-    Chunk_Mesh(vector<Block_Face> vertices, vector<Texture> textures)
-    {
+    Chunk_Mesh(vector<Block_Face> vertices, vector<Texture> textures) {
+        this->readyToRender = false;
+
         this->vertices = vertices;
         this->textures = textures;
 
         // Now that we have all the required data, set the vertex buffers and its attribute pointers.
         this->setupMesh();
+
+        this->readyToRender = true;
     }
 
     void doRender(Shader shader) {
-        Draw(shader);
+        if (readyToRender) {
+            Draw(shader);
+        }
+    }
+
+    bool ready() {
+        return readyToRender;
     }
 
 private:
@@ -52,6 +63,7 @@ private:
 
     /*  Render data  */
     GLuint VAO, VBO;
+    bool readyToRender = false;
 
     /*  Functions    */
     // Initializes all the buffer objects/arrays

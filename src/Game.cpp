@@ -6,9 +6,11 @@ Game::Game(int screenWidth, int screenHeight) {
 	textureLoader = new Texture_Loader();
 	loadTextures();
 
-	world = World(textureLoader);
+	world = new World(textureLoader);
 
-	player = new Player(&world, glm::vec3(-1.0f, 10.0f, -1.0f), glm::vec3(1, 2, 1));
+	player = new Player(world, glm::vec3(8.0f, 20.0f, 8.0f), glm::vec3(1, 2, 1));
+
+	world->updateChunkRenderDistance(2, 1, player->getX(), player->getZ());
 }
 
 Game::~Game() {
@@ -51,12 +53,12 @@ void Game::doRender(Text* text) {
 
 	blockShader.Use();
 	GLint modelLoc = glGetUniformLocation(blockShader.getProgram(), "model");
-	world.doRender(blockShader, modelLoc);
+	world->doRender(blockShader, modelLoc);
 
 	//text->RenderText(playerInfo, 25.0f, 225.0f, 1.0f, glm::vec3(1, 1, 1));
 
 	std::ostringstream keyPressed, chunkCoord;
-	Chunk* chunk = world.getChunk(player->getPosition().x, player->getPosition().z);
+	Chunk* chunk = world->getChunkByCoords(player->getPosition().x, player->getPosition().z);
 	if (chunk == nullptr) {
 		chunkCoord << "Chunk coord: NULL";
 	}

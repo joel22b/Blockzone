@@ -1,7 +1,7 @@
 #include "Chunk.h"
 
 Chunk::Chunk() {
-	render = false;
+	this->render = false;
 }
 
 Chunk::Chunk(Block_Consts* blockConsts, int xPos, int zPos) {
@@ -9,22 +9,12 @@ Chunk::Chunk(Block_Consts* blockConsts, int xPos, int zPos) {
 	this->blockConsts = blockConsts;
 	this->xPos = xPos;
 	this->zPos = zPos;
-	render = true;
-
-	/*for (int i = 0; i < CHUNK_MAX_WIDTH; i++) {
-		for (int j = 0; j < CHUNK_MAX_WIDTH; j++) {
-			addBlock(glm::vec3(i, 0, j), DIRT);
-		}
-	}
-	for (int i = 0; i < CHUNK_MAX_WIDTH; i++) {
-		for (int j = 0; j < CHUNK_MAX_WIDTH; j++) {
-			addBlock(glm::vec3(i, 1, j), GRASS);
-		}
-	}*/
+	this->render = false;
+	this->toDelete = false;
 }
 
 Chunk::~Chunk() {
-
+	delete chunkMesh;
 }
 
 void Chunk::doUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG) {
@@ -129,30 +119,74 @@ void Chunk::doUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk
 		}
 	}
 
-	chunkMesh = Chunk_Mesh(blockFaces, blockTextures);
+	this->render = false;
+	Chunk_Mesh* newChunkMesh = new Chunk_Mesh(blockFaces, blockTextures);
+	if (chunkMesh != nullptr) {
+		Chunk_Mesh* oldChunkMesh = chunkMesh;
+		chunkMesh = newChunkMesh;
+		delete oldChunkMesh;
+	}
+	else {
+		chunkMesh = newChunkMesh;
+	}
+	this->render = true;
 }
 
 void Chunk::doRender(Shader shader, GLuint modelLoc) {
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(glm::translate(glm::mat4(1), glm::vec3(xPos, 0, zPos))));
-	chunkMesh.doRender(shader);
+	if (chunkMesh != nullptr && chunkMesh->ready()) {
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(glm::translate(glm::mat4(1), glm::vec3(xPos * CHUNK_MAX_WIDTH, 0, zPos * CHUNK_MAX_WIDTH))));
+		chunkMesh->doRender(shader);
+	}
+	else {
+		std::cout << "No chunk mesh x=" << xPos << " z=" << zPos << std::endl;
+	}
 }
 
 bool Chunk::shouldRender() {
-	return this->render;
+	return this->render && chunkMesh != nullptr;
+}
+
+void Chunk::setRender(bool render) {
+	this->render = render;
 }
 
 void Chunk::addBlock(glm::vec3 relPos, Block_Type type) {
 	blocks[(int)relPos.x][(int)relPos.y][(int)relPos.z].setType(type);
 }
 
+void Chunk::addBlock(int x, int y, int z, Block_Type type) {
+	blocks[x][y][z].setType(type);
+}
+
 Block* Chunk::getBlock(int x, int y, int z) {
+	if (x < 0 || x >= CHUNK_MAX_WIDTH || y < 0 || y >= CHUNK_MAX_HEIGHT || z < 0 || z >= CHUNK_MAX_WIDTH) {
+		std::cout << "getBlock error x=" << x << " y=" << y << " z=" << z << std::endl;
+		return nullptr;
+	}
+
 	return &blocks[x][y][z];
 }
 
 int Chunk::getXPos() {
-	return xPos;
+	return xPos * CHUNK_MAX_WIDTH;
 }
 
 int Chunk::getZPos() {
+	return zPos * CHUNK_MAX_WIDTH;
+}
+
+int Chunk::getChunkXPos() {
+	return xPos;
+}
+
+int Chunk::getChunkZPos() {
 	return zPos;
+}
+
+bool Chunk::shouldDelete() {
+	return toDelete;
+}
+
+void Chunk::setDelete() {
+	toDelete = true;
 }
