@@ -42,8 +42,13 @@ public:
 
         // Now that we have all the required data, set the vertex buffers and its attribute pointers.
         this->setupMesh();
-
         this->readyToRender = true;
+    }
+
+    Chunk_Mesh(vector<Block_Face> vertices) {
+        this->readyToRender = false;
+
+        this->vertices = vertices;
     }
 
     void doRender(Shader shader) {
@@ -54,6 +59,13 @@ public:
 
     bool ready() {
         return readyToRender;
+    }
+
+    void doSetup(vector<Texture> textures) {
+        this->textures = textures;
+
+        this->setupMesh();
+        this->readyToRender = true;
     }
 
 private:

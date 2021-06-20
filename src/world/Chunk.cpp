@@ -19,6 +19,38 @@ Chunk::~Chunk() {
 
 void Chunk::doUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG) {
 	std::vector<Texture> blockTextures = blockConsts->getBlockTextures();
+	std::vector<Block_Face> blockFaces = calculateMesh(chunkXPOS, chunkXNEG, chunkZPOS, chunkZNEG);
+
+	this->render = false;
+	Chunk_Mesh* newChunkMesh = new Chunk_Mesh(blockFaces, blockTextures);
+	if (chunkMesh != nullptr) {
+		Chunk_Mesh* oldChunkMesh = chunkMesh;
+		chunkMesh = newChunkMesh;
+		delete oldChunkMesh;
+	}
+	else {
+		chunkMesh = newChunkMesh;
+	}
+	this->render = true;
+}
+
+void Chunk::doPartialUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG) {
+	std::vector<Block_Face> blockFaces = calculateMesh(chunkXPOS, chunkXNEG, chunkZPOS, chunkZNEG);
+
+	this->render = false;
+	Chunk_Mesh* newChunkMesh = new Chunk_Mesh(blockFaces);
+	if (chunkMesh != nullptr) {
+		Chunk_Mesh* oldChunkMesh = chunkMesh;
+		chunkMesh = newChunkMesh;
+		delete oldChunkMesh;
+	}
+	else {
+		chunkMesh = newChunkMesh;
+	}
+	this->render = true;
+}
+
+std::vector<Block_Face> Chunk::calculateMesh(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG) {
 	std::vector<Block_Face> blockFaces;
 	Block_Face blockFace;
 
@@ -119,21 +151,19 @@ void Chunk::doUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk
 		}
 	}
 
-	this->render = false;
-	Chunk_Mesh* newChunkMesh = new Chunk_Mesh(blockFaces, blockTextures);
-	if (chunkMesh != nullptr) {
-		Chunk_Mesh* oldChunkMesh = chunkMesh;
-		chunkMesh = newChunkMesh;
-		delete oldChunkMesh;
-	}
-	else {
-		chunkMesh = newChunkMesh;
-	}
-	this->render = true;
+	return blockFaces;
+}
+
+Chunk_Mesh* Chunk::getChunkMesh() {
+	return chunkMesh;
 }
 
 void Chunk::doRender(Shader shader, GLuint modelLoc) {
-	if (chunkMesh != nullptr && chunkMesh->ready()) {
+	if (chunkMesh != nullptr) {
+		if (!chunkMesh->ready()) {
+			std::cout << "Setting up chunk x=" << getChunkXPos() << " z=" << getChunkZPos() << std::endl;
+			chunkMesh->doSetup(blockConsts->getBlockTextures());
+		}
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(glm::translate(glm::mat4(1), glm::vec3(xPos * CHUNK_MAX_WIDTH, 0, zPos * CHUNK_MAX_WIDTH))));
 		chunkMesh->doRender(shader);
 	}

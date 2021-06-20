@@ -14,22 +14,18 @@ World::~World() {
 }
 
 void World::doUpdate() {
-	/*for (int i = 0; i < threadsShiftChunks.size(); i++) {
-		if (threadsShiftChunks.at(i).joinable()) {
-			delete threadsShiftChunks.at(i);
-		}
-	}*/
+	
 }
 
 void World::doRender(Shader shader, GLint modelLoc) {
-	for (int x = 0; x < chunksLength; x++) {
-		for (int z = 0; z < chunksLength; z++) {
-			if (getChunkNoOffset(x, z) != nullptr && getChunkNoOffset(x, z)->shouldRender()) {
-				getChunkNoOffset(x, z)->doRender(shader, modelLoc);
+	for (int i = 0; i < chunksLength * chunksLength; i++) {
+		if (chunks[i] != nullptr) {
+			if (chunks[i]->shouldRender()) {
+				chunks[i]->doRender(shader, modelLoc);
 			}
-			else {
-				//std::cout << "Cannot render x=" << x << " z=" << z << std::endl;
-			}
+		}
+		else {
+			std::cout << "Cannot render i=" << i << std::endl;
 		}
 	}
 }
@@ -220,9 +216,11 @@ void World::updateChunkNoOffset(Chunk* chunk) {
 		(zPos > 0) ? getChunkNoOffset(xPos, zPos - 1) : nullptr);
 }
 
-void World::shiftChunksThread(int xPos, int zPos) {
+void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 	int prevXPos = (renderDistance + bufferDistance) - chunkXOffset;
 	int prevZPos = (renderDistance + bufferDistance) - chunkZOffset;
+	int chunkXOffsetNew = chunkXOffset;
+	int chunkZOffsetNew = chunkZOffset;
 
 	// Copy chunks array
 	Chunk** chunksTemp = new Chunk * [chunksLength * chunksLength];
@@ -233,7 +231,7 @@ void World::shiftChunksThread(int xPos, int zPos) {
 	// Check X
 	if (xPos != prevXPos) {
 		int shiftDist = (prevXPos - xPos) * chunksLength;
-		chunkXOffset += prevXPos - xPos;
+		chunkXOffsetNew += prevXPos - xPos;
 
 		if (xPos > prevXPos) {
 			// Shift and clean chunks array
@@ -256,8 +254,8 @@ void World::shiftChunksThread(int xPos, int zPos) {
 					std::cout << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength << std::endl;
 				}
 				else {
-					int chunkX = (int)(i / chunksLength) - chunkXOffset;
-					int chunkZ = i % chunksLength - chunkZOffset;
+					int chunkX = (int)(i / chunksLength) - chunkXOffsetNew;
+					int chunkZ = i % chunksLength - chunkZOffsetNew;
 					chunksTemp[i] = new Chunk(blockConsts, chunkX, chunkZ);
 					loadChunk(chunksTemp[i]);
 				}
@@ -284,8 +282,8 @@ void World::shiftChunksThread(int xPos, int zPos) {
 					std::cout << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength << std::endl;
 				}
 				else {
-					int chunkX = (int)(i / chunksLength) - chunkXOffset;
-					int chunkZ = i % chunksLength - chunkZOffset;
+					int chunkX = (int)(i / chunksLength) - chunkXOffsetNew;
+					int chunkZ = i % chunksLength - chunkZOffsetNew;
 					chunksTemp[i] = new Chunk(blockConsts, chunkX, chunkZ);
 					loadChunk(chunksTemp[i]);
 				}
@@ -296,7 +294,7 @@ void World::shiftChunksThread(int xPos, int zPos) {
 	// Check Z
 	if (zPos != prevZPos) {
 		int shiftDist = prevZPos - zPos;
-		chunkZOffset += shiftDist;
+		chunkZOffsetNew += shiftDist;
 
 		if (zPos > prevZPos) {
 			// Shift and clean chunks array
@@ -319,8 +317,8 @@ void World::shiftChunksThread(int xPos, int zPos) {
 					if (chunksTemp[i] != nullptr) {
 						std::cout << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength << std::endl;
 					}
-					int chunkX = (int)(i / chunksLength) - chunkXOffset;
-					int chunkZ = i % chunksLength - chunkZOffset;
+					int chunkX = (int)(i / chunksLength) - chunkXOffsetNew;
+					int chunkZ = i % chunksLength - chunkZOffsetNew;
 					Chunk* chunk = new Chunk(blockConsts, chunkX, chunkZ);
 					loadChunk(chunk);
 					chunksTemp[i] = chunk;
@@ -348,8 +346,8 @@ void World::shiftChunksThread(int xPos, int zPos) {
 					if (chunksTemp[i] != nullptr) {
 						std::cout << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength << std::endl;
 					}
-					int chunkX = (int)(i / chunksLength) - chunkXOffset;
-					int chunkZ = i % chunksLength - chunkZOffset;
+					int chunkX = (int)(i / chunksLength) - chunkXOffsetNew;
+					int chunkZ = i % chunksLength - chunkZOffsetNew;
 					Chunk* chunk = new Chunk(blockConsts, chunkX, chunkZ);
 					loadChunk(chunk);
 					chunksTemp[i] = chunk;
@@ -359,29 +357,31 @@ void World::shiftChunksThread(int xPos, int zPos) {
 	}
 
 	// Update the chunks
-	for (int i = bufferDistance; i <= (renderDistance * 2) + bufferDistance; i++) {
-		for (int j = bufferDistance; j <= (renderDistance * 2) + bufferDistance; j++) {
-			Chunk* chunk;
-			if ((i * chunksLength) + j >= chunksLength * chunksLength || (i * chunksLength) + j < 0) {
-				chunk = nullptr;
-				continue;
+	for (int x = 0; x < chunksLength; x++) {
+		for (int z = 0; z < chunksLength; z++) {
+			if (x >= bufferDistance && x < chunksLength - bufferDistance && z >= bufferDistance && z < chunksLength - bufferDistance) {
+				// These are chunks to be rendered
+				Chunk* chunk = chunksTemp[(x * chunksLength) + z];
+				if (!chunk->shouldRender()) {
+					// Update chunk
+					chunk->doPartialUpdate((x < chunksLength - 1) ? chunksTemp[((x + 1) * chunksLength) + z] : nullptr,
+						(x > 0) ? chunksTemp[((x - 1) * chunksLength) + z] : nullptr,
+						(z < chunksLength - 1) ? chunksTemp[(x * chunksLength) + z + 1] : nullptr,
+						(z > 0) ? chunksTemp[(x * chunksLength) + z - 1] : nullptr);
+				}
 			}
 			else {
-				chunk = chunksTemp[(i * chunksLength) + j];
+				// These are buffer chunks
+				chunksTemp[(x * chunksLength) + z]->setRender(false);
 			}
-
-			chunk->doUpdate((i < chunksLength - 1) ? chunksTemp[((i + 1) * chunksLength) + j] : nullptr,
-				(i > 0) ? chunksTemp[((i - 1) * chunksLength) + j] : nullptr,
-				(j < chunksLength - 1) ? chunksTemp[(i * chunksLength) + j + 1] : nullptr,
-				(j > 0) ? chunksTemp[(i * chunksLength) + j - 1] : nullptr);
-
-			chunk->setRender(true);
 		}
 	}
 
 	// Switch to new chunks array
 	Chunk** chunksOld = chunks;
 	chunks = chunksTemp;
+	chunkXOffset = chunkXOffsetNew;
+	chunkZOffset = chunkZOffsetNew;
 
 	// Clean up old chunks array
 	for (int i = 0; i < chunksLength * chunksLength; i++) {
@@ -390,21 +390,11 @@ void World::shiftChunksThread(int xPos, int zPos) {
 		}
 	}
 	delete[] chunksOld;
-
-	std::cout << "---==== Printing out chunks ====---" << std::endl;
-
-	for (int i = 0; i < chunksLength * chunksLength; i++) {
-		std::cout << "i=" << i << " x=" << chunksTemp[i]->getChunkXPos() << " z=" << chunksTemp[i]->getChunkZPos() << " show=" << chunksTemp[i]->shouldRender() << std::endl;
-	}
-
-	std::cout << "---==== Shifted chunks ====---" << std::endl;
 }
 
 void World::shiftChunks(int xPos, int zPos) {
-	std::cout << "---==== Shifting chunks ====---" << std::endl;
-	//std::thread threadShiftChunks(&World::shiftChunksThread, this, xPos, zPos);
-	//threadShiftChunks.detach();
-	shiftChunksThread(xPos, zPos);
+	std::thread threadShiftChunks(&World::shiftChunksThread, this, blockConsts, xPos, zPos);
+	threadShiftChunks.detach();
 }
 
 void World::updateChunkRenderDistance(int renderDistance, int bufferDistance, int xPos, int zPos) {
@@ -413,6 +403,10 @@ void World::updateChunkRenderDistance(int renderDistance, int bufferDistance, in
 
 	// Clear chunk arrays
 	if (chunks != nullptr) {
+		for (int i = 0; i < chunksLength * chunksLength; i++) {
+			saveChunk(chunks[i]);
+			delete chunks[i];
+		}
 		delete[] chunks;
 	}
 

@@ -24,12 +24,18 @@ private:
 	int xPos, zPos;
 	bool render, toDelete;
 
+	std::vector<Block_Face> calculateMesh(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG);
+
 public:
 	Chunk();
 	Chunk(Block_Consts* blockConsts, int xPos, int zPos);
 	~Chunk();
 
+	Chunk_Mesh* getChunkMesh();
+
 	void doUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG);
+	void doPartialUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG);
+
 	void doRender(Shader shader, GLuint modelLoc);
 	bool shouldRender();
 	void setRender(bool render);
