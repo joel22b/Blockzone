@@ -26,6 +26,8 @@ public:
 	void processKeyboardInput(Player_Movement movement, GLfloat deltaTime);
 	void processMouseInput(GLfloat xOffset, GLfloat yOffset, GLboolean constrainPitch = true);
 
+	void doUpdate() override;
+
 	glm::mat4 getViewMatrix();
 
 	glm::vec3 getCameraPosition();
@@ -34,6 +36,7 @@ public:
 private:
 	Camera* camera;
 	GLfloat mouseSensitivity = 0.25f;
+	glm::vec2 chunkCoords;
 
 	void updateVectors() override;
 };

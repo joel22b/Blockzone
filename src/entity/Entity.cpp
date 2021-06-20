@@ -113,6 +113,18 @@ glm::vec3 Entity::getDirection() {
 	return front;
 }
 
+float Entity::getX() {
+	return position.x;
+}
+
+float Entity::getY() {
+	return position.y;
+}
+
+float Entity::getZ() {
+	return position.z;
+}
+
 void Entity::updateVectors() {
 	glm::vec3 front;
 	front.x = cos(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
