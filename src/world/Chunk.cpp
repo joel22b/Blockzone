@@ -161,7 +161,6 @@ Chunk_Mesh* Chunk::getChunkMesh() {
 void Chunk::doRender(Shader shader, GLuint modelLoc) {
 	if (chunkMesh != nullptr) {
 		if (!chunkMesh->ready()) {
-			std::cout << "Setting up chunk x=" << getChunkXPos() << " z=" << getChunkZPos() << std::endl;
 			chunkMesh->doSetup(blockConsts->getBlockTextures());
 		}
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(glm::translate(glm::mat4(1), glm::vec3(xPos * CHUNK_MAX_WIDTH, 0, zPos * CHUNK_MAX_WIDTH))));
