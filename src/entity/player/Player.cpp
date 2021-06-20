@@ -53,9 +53,9 @@ void Player::processMouseInput(GLfloat xOffset, GLfloat yOffset, GLboolean const
 	updateVectors();
 }
 
-void Player::doUpdate() {
+void Player::doUpdate(GLfloat deltaTime) {
 	// Do regular entity update
-	Entity::doUpdate();
+	Entity::doUpdate(deltaTime);
 
 	// Check if changed chunks
 	if (chunkCoords != world->getChunkCoords((int)position.x, (int)position.z)) {

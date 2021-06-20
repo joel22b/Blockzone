@@ -40,8 +40,8 @@ void Game::doInput(GLfloat deltaTime) {
 	}
 }
 
-void Game::doUpdate() {
-	player->doUpdate();
+void Game::doUpdate(GLfloat deltaTime) {
+	player->doUpdate(deltaTime);
 
 	blockShader.Use();
 	glUniformMatrix4fv(glGetUniformLocation(blockShader.getProgram(), "view"), 1, GL_FALSE, glm::value_ptr(player->getViewMatrix()));
