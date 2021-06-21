@@ -28,7 +28,7 @@ Entity::~Entity() {
 void Entity::doUpdate(GLfloat deltaTime) {
 	// Update velocity
 	if (!flying) {
-		this->velocity -= this->worldUp * (3.0f * deltaTime);	// Gravity
+		this->velocity -= this->worldUp * (9.8f * deltaTime);	// Gravity
 
 		this->potentialPos += this->velocity * deltaTime;
 
