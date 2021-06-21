@@ -40,7 +40,7 @@ public:
 	~Game();
 
 	void doInput(GLfloat deltaTime);
-	void doUpdate();
+	void doUpdate(GLfloat deltaTime);
 	void doRender(Text* text);
 
 	void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);

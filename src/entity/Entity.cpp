@@ -25,15 +25,15 @@ Entity::~Entity() {
 
 }
 
-void Entity::doUpdate() {
+void Entity::doUpdate(GLfloat deltaTime) {
 	// Update velocity
 	if (!flying) {
-		this->velocity -= this->worldUp * 0.0005f;	// Gravity
+		this->velocity -= this->worldUp * (9.8f * deltaTime);	// Gravity
 
-		this->potentialPos += this->velocity;
+		this->potentialPos += this->velocity * deltaTime;
 
-		velocity.x = velocity.x * 0.9f;
-		velocity.z = velocity.z * 0.9f;
+		velocity.x = velocity.x * (0.9f * deltaTime);
+		velocity.z = velocity.z * (0.9f * deltaTime);
 	}
 	else {
 		this->velocity = glm::vec3(0.0f, 0.0f, 0.0f);

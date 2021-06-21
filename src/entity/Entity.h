@@ -15,10 +15,10 @@
 class Entity {
 public:
 	Entity();
-	Entity(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw = 0.0f, GLfloat pitch = 0.0f, bool flying = false, float speed = 6.0f, float jumpSpeed = 0.05f);
+	Entity(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat yaw = 0.0f, GLfloat pitch = 0.0f, bool flying = false, float speed = 6.0f, float jumpSpeed = 6.0f);
 	~Entity();
 
-	virtual void doUpdate();
+	virtual void doUpdate(GLfloat deltaTime);
 
 	glm::vec3 getPosition();
 	glm::vec3 getDirection();
