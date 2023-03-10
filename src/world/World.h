@@ -4,6 +4,7 @@
 #include <math.h>
 #include <string>
 #include <thread>
+#include <mutex>
 
 #include "glm/glm.hpp"
 #include "glm/gtc/noise.hpp"
@@ -34,6 +35,7 @@ public:
 
 private:
 	Chunk** chunks;
+	std::mutex chunksMutex;
 	int chunkXOffset, chunkZOffset;
 	int renderDistance, bufferDistance, chunksLength;
 	Block_Consts* blockConsts;
