@@ -1,5 +1,8 @@
 #include "Player.h"
 
+#include "../../utils/Logger.h"
+#define LOG(severity, msg) Logger::log("Player.cpp", severity, msg)
+
 Player::Player() : Entity() {
 	camera = nullptr;
 }

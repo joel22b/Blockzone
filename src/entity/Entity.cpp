@@ -1,5 +1,8 @@
 #include "Entity.h"
 
+#include "../utils/Logger.h"
+#define LOG(severity, msg) Logger::log("Entity.cpp", severity, msg)
+
 Entity::Entity() {
 
 }
@@ -22,7 +25,7 @@ Entity::Entity(World* world, glm::vec3 position, glm::vec3 dimentions, GLfloat y
 }
 
 Entity::~Entity() {
-
+	LOG(INFO, "Deleting");
 }
 
 void Entity::doUpdate(GLfloat deltaTime) {

@@ -1,9 +1,9 @@
 #include "game.h"
 
+#include "utils/Logger.h"
 #define LOG(severity, msg) Logger::log("Game.cpp", severity, msg)
 
 Game::Game(int screenWidth, int screenHeight) {
-	logger = new Logger();
 	LOG(INFO, "Creating Game instance");
 
 	loadShaders(screenWidth, screenHeight);
@@ -21,8 +21,8 @@ Game::Game(int screenWidth, int screenHeight) {
 }
 
 Game::~Game() {
+	LOG(INFO, "Deleting");
 	delete textureLoader;
-	delete logger;
 }
 
 void Game::doInput(GLfloat deltaTime) {

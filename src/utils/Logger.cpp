@@ -65,7 +65,6 @@ Logger::Logger() {
 
     // Create worker threads
     worker = std::thread(&Logger::workerThread, this, &killSignal);
-    worker.detach();
 }
 
 Logger::~Logger() {
@@ -107,6 +106,8 @@ void Logger::workerThread(std::mutex* killSig) {
 
         lk.unlock();
     }
+
+    killSig->unlock();
 }
 
 void Logger::writeLogToFiles(LogData* logData) {

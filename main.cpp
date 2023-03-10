@@ -20,6 +20,9 @@
 #include "src/Game.h"
 #include "src/Text.h"
 
+#include "src/utils/Logger.h"
+#define LOG(severity, msg) Logger::log("main.cpp", severity, msg)
+
 // Window dimensions
 const GLint WIDTH = 1600, HEIGHT = 800;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
@@ -39,11 +42,15 @@ std::string mspfText = "test", fpsText = "test";
 
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
+Logger* logger;
+
 Game* game;
 
 Text arialText;
 
 int main() {
+    logger = new Logger();
+
     glfwInit();
 
     // Set OpenGL version to 3.3
@@ -54,13 +61,16 @@ int main() {
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     // Creates the window (The two nullptrs are monitor and window respectively)
+    std::ostringstream msg;
+	msg << "Creating GFLW window: width=" << WIDTH << " height=" << HEIGHT;
+	LOG(INFO, msg.str());
     GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Blockzone", nullptr, nullptr);
 
     // Adjusts for pixel density
     glfwGetFramebufferSize(window, &SCREEN_WIDTH, &SCREEN_HEIGHT);
 
     if (window == nullptr) {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        LOG(ERROR, "Failed to create GLFW window");
         glfwTerminate();
 
         return EXIT_FAILURE;
@@ -68,6 +78,7 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
+    LOG(INFO, "Setting callbacks for keyboard and mouse");
     glfwSetKeyCallback(window, KeyCallback);
     glfwSetCursorPosCallback(window, MouseCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -75,7 +86,7 @@ int main() {
     glewExperimental = GL_TRUE;
 
     if (glewInit() != GLEW_OK) {
-        std::cout << "Failed to initialise GLEW" << std::endl;
+        LOG(ERROR, "Failed to initialise GLEW");
 
         return EXIT_FAILURE;
     }
@@ -93,6 +104,7 @@ int main() {
     arialText = Text("Freetype2/Fonts/arial.ttf", 20);
 
     // Main program loop
+    LOG(INFO, "Entering main loop");
     while (!glfwWindowShouldClose(window)) {
         // Get time since last frame
         GLfloat currentFrame = glfwGetTime();
@@ -126,11 +138,18 @@ int main() {
 
         glfwSwapBuffers(window);
     }
+    LOG(INFO, "Exiting main loop");
 
     // If here, program is exiting
     delete game;
 
+    LOG(INFO, "Terminating GLFW");
+
     glfwTerminate();
+    
+	delete logger;
+
+    std::cout << "Done" << std::endl;
 
     return EXIT_SUCCESS;
 }
