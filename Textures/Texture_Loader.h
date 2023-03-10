@@ -8,6 +8,9 @@
 
 #include "../SOIL2/src/SOIL2/SOIL2.h";
 
+#include "../src/utils/Logger.h"
+#define LOG(severity, msg) Logger::log("Texture_Loader.h", severity, msg)
+
 struct Texture {
     GLuint id;
     std::string type;
@@ -19,6 +22,9 @@ private:
 
 public:
 	Texture_Loader() {}
+    ~Texture_Loader() {
+        LOG(INFO, "Deleting");
+    }
 
 	void loadTexture(std::string textureName, const char* path) {
         GLuint textureMap;
@@ -45,8 +51,7 @@ public:
             return this->loadedTextures[textureName];
         }
         else {
-            std::cout << "ERROR::TEXTURE_LOADER::UNKNOWN_TEXTURE_NAME" << std::endl;
-            std::cout << "\t" << textureName << std::endl;
+            LOG(ERROR, "Unknown texture name: " + textureName);
             return this->loadedTextures["error"];
         }
     }

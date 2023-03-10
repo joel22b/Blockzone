@@ -17,6 +17,7 @@ Chunk::Chunk(Block_Consts* blockConsts, int xPos, int zPos) {
 }
 
 Chunk::~Chunk() {
+	LOG(DEBUG, "Deleting");
 	if (chunkMesh != nullptr) {
 		delete chunkMesh;
 	}

@@ -1,5 +1,8 @@
 #include "Block.h"
 
+#include "../../utils/Logger.h"
+#define LOG(severity, msg) Logger::log("Block.cpp", severity, msg)
+
 Block::Block(Block_Type type) {
 	this->type = type;
 }

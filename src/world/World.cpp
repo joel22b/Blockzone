@@ -13,7 +13,7 @@ World::World(Texture_Loader* textureLoader) {
 }
 
 World::~World() {
-
+	LOG(INFO, "Deleting");
 }
 
 void World::doUpdate() {
@@ -24,9 +24,9 @@ void World::doRender(Shader shader, GLint modelLoc) {
 	if (chunksMutex.try_lock()) {
 		for (int i = 0; i < chunksLength * chunksLength; i++) {
 			if (chunks[i] != nullptr) {
-				std::ostringstream msg;
-				msg << "Rendering chunk " << i << " if possible";
-				LOG(DEBUG, msg.str());
+				//std::ostringstream msg;
+				//msg << "Rendering chunk " << i << " if possible";
+				//LOG(DEBUG, msg.str());
 				if (chunks[i]->shouldRender()) {
 					chunks[i]->doRender(shader, modelLoc);
 				}
