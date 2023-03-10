@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <fstream>
+#include <mutex>
 
 #include <sys/stat.h>
 
@@ -20,6 +21,7 @@ class Chunk {
 private:
 	std::vector<std::vector<std::vector<Block>>> blocks;
 	Chunk_Mesh* chunkMesh = nullptr;
+	std::mutex chuckMeshMutex;
 	Block_Consts* blockConsts;
 	int xPos, zPos;
 	bool render, toDelete;

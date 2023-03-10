@@ -1,6 +1,11 @@
 #include "game.h"
 
+#define LOG(severity, msg) Logger::log("Game.cpp", severity, msg)
+
 Game::Game(int screenWidth, int screenHeight) {
+	logger = new Logger();
+	LOG(INFO, "Creating Game instance");
+
 	loadShaders(screenWidth, screenHeight);
 
 	textureLoader = new Texture_Loader();
@@ -11,10 +16,13 @@ Game::Game(int screenWidth, int screenHeight) {
 	player = new Player(world, glm::vec3(8.0f, 20.0f, 8.0f), glm::vec3(1, 2, 1));
 
 	world->updateChunkRenderDistance(2, 1, player->getX(), player->getZ());
+
+	LOG(INFO, "Finished creating Game instance");
 }
 
 Game::~Game() {
 	delete textureLoader;
+	delete logger;
 }
 
 void Game::doInput(GLfloat deltaTime) {

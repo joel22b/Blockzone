@@ -1,5 +1,8 @@
 #include "World.h"
 
+#include "../utils/Logger.h"
+#define LOG(severity, msg) Logger::log("World.cpp", severity, msg)
+
 World::World() {}
 
 World::World(Texture_Loader* textureLoader) {
@@ -18,15 +21,23 @@ void World::doUpdate() {
 }
 
 void World::doRender(Shader shader, GLint modelLoc) {
-	for (int i = 0; i < chunksLength * chunksLength; i++) {
-		if (chunks[i] != nullptr) {
-			if (chunks[i]->shouldRender()) {
-				chunks[i]->doRender(shader, modelLoc);
+	if (chunksMutex.try_lock()) {
+		for (int i = 0; i < chunksLength * chunksLength; i++) {
+			if (chunks[i] != nullptr) {
+				std::ostringstream msg;
+				msg << "Rendering chunk " << i << " if possible";
+				LOG(DEBUG, msg.str());
+				if (chunks[i]->shouldRender()) {
+					chunks[i]->doRender(shader, modelLoc);
+				}
+			}
+			else {
+				std::ostringstream msg;
+				msg << "Cannot render i=" << i;
+				LOG(WARN, msg.str());
 			}
 		}
-		else {
-			std::cout << "Cannot render i=" << i << std::endl;
-		}
+		chunksMutex.unlock();
 	}
 }
 
@@ -117,16 +128,15 @@ void World::loadChunk(Chunk* chunk) {
 			fileData = stream.str();
 		}
 		catch (std::ifstream::failure e) {
-			std::cout << "ERROR::CHUNK::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
-			std::cout << "\tfile: " << chunkFilePath << std::endl;
+			LOG(ERROR, "File not able to be successfully read in loadChunk: \"" + chunkFilePath + "\"");
 			return;
 		}
 
 		// Check that fileData is valid
 		if (fileData.length() != CHUNK_MAX_WIDTH * CHUNK_MAX_WIDTH * CHUNK_MAX_HEIGHT) {
-			std::cout << "ERROR::CHUNK::FILE_NOT_CORRECT_SIZE" << std::endl;
-			std::cout << "\tfile: " << chunkFilePath << std::endl;
-			std::cout << "\tsize: " << fileData.length() << std::endl;
+			std::ostringstream msg;
+			msg << "File size incorrect in loadChunk: \"" << chunkFilePath << "\" size=" << fileData.length();
+			LOG(ERROR, msg.str());
 			return;
 		}
 
@@ -168,16 +178,13 @@ void World::saveChunk(Chunk* chunk) {
 		}
 	}
 
-	//std::cout << chunkData << std::endl;
-
 	try {
 		std::ofstream file(chunkFilePath);
 		file << chunkData;
 		file.close();
 	}
 	catch (std::ofstream::failure e) {
-		std::cout << "ERROR::CHUNK::FILE_NOT_SUCCESSFULLY_WRITTEN" << std::endl;
-		std::cout << "\tfile: " << chunkFilePath << std::endl;
+		LOG(ERROR, "File not able to be successfully written in saveChunk: \"" + chunkFilePath + "\"");
 		return;
 	}
 }
@@ -191,7 +198,9 @@ void World::updateChunkNoOffset(int xPos, int zPos) {
 	Chunk* chunk = getChunkNoOffset(xPos, zPos);
 
 	if (chunk == nullptr) {
-		std::cout << "Failed updating chunk x=" << xPos << " z=" << zPos << std::endl;
+		std::ostringstream msg;
+		msg << "Failed to update chunk x=" << xPos << " z=" << zPos;
+		LOG(WARN, msg.str());
 		return;
 	}
 
@@ -206,7 +215,9 @@ void World::updateChunkNoOffset(Chunk* chunk) {
 	int zPos = chunk->getChunkZPos();
 
 	if (chunk == nullptr) {
-		std::cout << "Failed updating chunk x=" << xPos << " z=" << zPos << std::endl;
+		std::ostringstream msg;
+		msg << "Failed to update chunk x=" << xPos << " z=" << zPos;
+		LOG(WARN, msg.str());
 		return;
 	}
 
@@ -251,7 +262,9 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 			// Load new data
 			for (int i = (chunksLength * chunksLength) + shiftDist; i < chunksLength * chunksLength; i++) {
 				if (chunksTemp[i] != nullptr) {
-					std::cout << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength << std::endl;
+					std::ostringstream msg;
+					msg << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength;
+					LOG(INFO, msg.str());
 				}
 				else {
 					int chunkX = (int)(i / chunksLength) - chunkXOffsetNew;
@@ -279,7 +292,9 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 			// Load new data
 			for (int i = 0; i < shiftDist; i++) {
 				if (chunksTemp[i] != nullptr) {
-					std::cout << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength << std::endl;
+					std::ostringstream msg;
+					msg << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength;
+					LOG(INFO, msg.str());
 				}
 				else {
 					int chunkX = (int)(i / chunksLength) - chunkXOffsetNew;
@@ -315,7 +330,9 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 			for (int i = 0; i < chunksLength * chunksLength; i++) {
 				if (i % chunksLength >= chunksLength + shiftDist) {
 					if (chunksTemp[i] != nullptr) {
-						std::cout << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength << std::endl;
+						std::ostringstream msg;
+						msg << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength;
+						LOG(INFO, msg.str());
 					}
 					int chunkX = (int)(i / chunksLength) - chunkXOffsetNew;
 					int chunkZ = i % chunksLength - chunkZOffsetNew;
@@ -344,7 +361,9 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 			for (int i = 0; i < chunksLength * chunksLength; i++) {
 				if (i % chunksLength < shiftDist) {
 					if (chunksTemp[i] != nullptr) {
-						std::cout << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength << std::endl;
+						std::ostringstream msg;
+						msg << "i=" << i << " shiftDist=" << shiftDist << " chunksLength=" << chunksLength;
+						LOG(INFO, msg.str());
 					}
 					int chunkX = (int)(i / chunksLength) - chunkXOffsetNew;
 					int chunkZ = i % chunksLength - chunkZOffsetNew;
@@ -377,11 +396,17 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 		}
 	}
 
+	LOG(DEBUG, "Done generating new chunks array, entering critical section");
+
 	// Switch to new chunks array
+	chunksMutex.lock();
 	Chunk** chunksOld = chunks;
 	chunks = chunksTemp;
 	chunkXOffset = chunkXOffsetNew;
 	chunkZOffset = chunkZOffsetNew;
+	chunksMutex.unlock();
+
+	LOG(DEBUG, "Exited critical section, removing old");
 
 	// Clean up old chunks array
 	for (int i = 0; i < chunksLength * chunksLength; i++) {
@@ -393,6 +418,8 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 }
 
 void World::shiftChunks(int xPos, int zPos) {
+	LOG(DEBUG, "Shifting chunks");
+
 	std::thread threadShiftChunks(&World::shiftChunksThread, this, blockConsts, xPos, zPos);
 	threadShiftChunks.detach();
 }

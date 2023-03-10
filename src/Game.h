@@ -16,6 +16,8 @@
 #include "../Textures/Texture_Loader.h"
 #include "Text.h"
 
+#include "utils/Logger.h"
+
 #include "entity/player/Player.h"
 
 class Game {
@@ -26,6 +28,8 @@ private:
 	World* world;
 
 	Player* player;
+
+	Logger* logger;
 
 	bool keys[1024] = { false };
 	GLfloat lastX;

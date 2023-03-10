@@ -33,6 +33,7 @@
 
 # VS code
 .vs/
+.vscode/
 *.sln
 *.vcxproj
 *.filters
@@ -44,3 +45,4 @@ Release/
 SOIL2/
 Freetype2/
 saves/
+logs/
