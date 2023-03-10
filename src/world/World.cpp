@@ -228,6 +228,7 @@ void World::updateChunkNoOffset(Chunk* chunk) {
 }
 
 void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
+	shiftMutex.lock();
 	int prevXPos = (renderDistance + bufferDistance) - chunkXOffset;
 	int prevZPos = (renderDistance + bufferDistance) - chunkZOffset;
 	int chunkXOffsetNew = chunkXOffset;
@@ -253,6 +254,10 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 				if (i + shiftDist < 0) {
 					saveChunk(chunk);
 					chunk->setDelete();
+
+					std::ostringstream msg;
+					msg << "Marking chunk for delete c1 " << i;
+					LOG(DEBUG, msg.str());
 				}
 				else {
 					chunksTemp[i + shiftDist] = chunk;
@@ -283,6 +288,10 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 				if (i + shiftDist >= chunksLength * chunksLength) {
 					saveChunk(chunk);
 					chunk->setDelete();
+
+					std::ostringstream msg;
+					msg << "Marking chunk for delete c2 " << i;
+					LOG(DEBUG, msg.str());
 				}
 				else {
 					chunksTemp[i + shiftDist] = chunk;
@@ -320,6 +329,10 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 				if ((int)((i + shiftDist) / chunksLength) != (int)(i / chunksLength) || i + shiftDist < 0) {
 					saveChunk(chunk);
 					chunk->setDelete();
+
+					std::ostringstream msg;
+					msg << "Marking chunk for delete c3 " << i;
+					LOG(DEBUG, msg.str());
 				}
 				else {
 					chunksTemp[i + shiftDist] = chunk;
@@ -351,6 +364,10 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 				if ((int)((i + shiftDist) / chunksLength) != (int)(i / chunksLength) || i + shiftDist >= chunksLength * chunksLength) {
 					saveChunk(chunk);
 					chunk->setDelete();
+
+					std::ostringstream msg;
+					msg << "Marking chunk for delete c4 " << i;
+					LOG(DEBUG, msg.str());
 				}
 				else {
 					chunksTemp[i + shiftDist] = chunk;
@@ -396,7 +413,7 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 		}
 	}
 
-	LOG(DEBUG, "Done generating new chunks array, entering critical section");
+	LOG(DEBUG, "Done generating new chunks array, entering crtical section");
 
 	// Switch to new chunks array
 	chunksMutex.lock();
@@ -415,6 +432,9 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 		}
 	}
 	delete[] chunksOld;
+
+	LOG(DEBUG, "Chunk shifter thread done");
+	shiftMutex.unlock();
 }
 
 void World::shiftChunks(int xPos, int zPos) {

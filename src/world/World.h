@@ -36,6 +36,7 @@ public:
 private:
 	Chunk** chunks;
 	std::mutex chunksMutex;
+	std::mutex shiftMutex;
 	int chunkXOffset, chunkZOffset;
 	int renderDistance, bufferDistance, chunksLength;
 	Block_Consts* blockConsts;
