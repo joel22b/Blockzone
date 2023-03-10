@@ -52,18 +52,13 @@ public:
     }
 
     void doRender(Shader shader) {
-        try {
-            if (readyToRender) {
-                Draw(shader);
-            }
-        }
-        catch (std::exception e) {
-            std::cout << e.what() << std::endl;
+        if (readyToRender) {
+            Draw(shader);
         }
     }
 
     bool ready() {
-         return readyToRender;
+        return readyToRender;
     }
 
     void doSetup(vector<Texture> textures) {
