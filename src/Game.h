@@ -13,7 +13,7 @@
 #include "Camera.h"
 #include "../Shaders/Shader.h"
 #include "world/World.h"
-#include "../Textures/Texture_Loader.h"
+#include "utils/Texture_Loader.h"
 #include "Text.h"
 
 #include "entity/player/Player.h"
@@ -33,7 +33,6 @@ private:
 	bool firstMouse = true;
 
 	void loadShaders(int screenWidth, int screenHeight);
-	void loadTextures();
 
 public:
 	Game(int screenWidth, int screenHeight);

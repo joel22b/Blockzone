@@ -5,13 +5,17 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <mutex>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Shaders/Shader.h"
-#include "../Textures/Texture_Loader.h"
+#include "utils/Texture_Loader.h"
+
+#include "utils/Logger.h"
+#define LOG(severity, msg) Logger::log("Chunk_Mesh.h", severity, msg)
 
 using namespace std;
 
@@ -29,53 +33,47 @@ class Chunk_Mesh
 {
 public:
     /*  Functions  */
-    Chunk_Mesh() {
-        this->readyToRender = false;
-    }
-
     // Constructor
     Chunk_Mesh(vector<Block_Face> vertices, vector<Texture> textures) {
-        this->readyToRender = false;
-
-        this->vertices = vertices;
+        updateVertices(vertices);
+        
+        texturesMutex.lock();
         this->textures = textures;
-
-        // Now that we have all the required data, set the vertex buffers and its attribute pointers.
-        this->setupMesh();
-        this->readyToRender = true;
-    }
-
-    Chunk_Mesh(vector<Block_Face> vertices) {
-        this->readyToRender = false;
-
-        this->vertices = vertices;
+        texturesMutex.unlock();
     }
 
     void doRender(Shader shader) {
-        if (readyToRender) {
-            Draw(shader);
+        if (meshMutex.try_lock()) {
+            if (texturesMutex.try_lock()) {
+                Draw(shader);
+                texturesMutex.unlock();
+            }
+            else {
+                LOG(DEBUG, "Texture mutex locked");
+            }
+            meshMutex.unlock();
+        }
+        else {
+            LOG(DEBUG, "Mesh mutex locked");
         }
     }
 
-    bool ready() {
-        return readyToRender;
-    }
+    void updateVertices(vector<Block_Face> vertices) {
+        meshMutex.lock();
+        this->vertices = vertices;
 
-    void doSetup(vector<Texture> textures) {
-        this->textures = textures;
-
-        this->setupMesh();
-        this->readyToRender = true;
+        setupMesh();
+        meshMutex.unlock();
     }
 
 private:
     /*  Mesh Data  */
     vector<Block_Face> vertices;
     vector<Texture> textures;
+    std::mutex meshMutex, texturesMutex;
 
     /*  Render data  */
     GLuint VAO, VBO;
-    bool readyToRender = false;
 
     /*  Functions    */
     // Initializes all the buffer objects/arrays
