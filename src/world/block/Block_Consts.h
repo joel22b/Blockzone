@@ -12,7 +12,8 @@
 enum Block_Type {
 	AIR = 0,
 	GRASS = 1,
-	DIRT = 2
+	DIRT = 2,
+	TEST = 3
 };
 
 enum Block_Side {
@@ -50,19 +51,27 @@ private:
 
 	void loadBlockTexCoords() {
 		// GRASS
-		blockTexCoords["1_0"] = glm::vec2(1.0f / 3.0f, 0.0f);
-		blockTexCoords["1_1"] = glm::vec2(1.0f / 3.0f, 0.0f);
-		blockTexCoords["1_2"] = glm::vec2(0.0f / 3.0f, 0.0f);
-		blockTexCoords["1_3"] = glm::vec2(2.0f / 3.0f, 0.0f);
-		blockTexCoords["1_4"] = glm::vec2(1.0f / 3.0f, 0.0f);
-		blockTexCoords["1_5"] = glm::vec2(1.0f / 3.0f, 0.0f);
+		blockTexCoords["1_0"] = glm::vec2(1.0f / 4.0f, 0.0f);
+		blockTexCoords["1_1"] = glm::vec2(1.0f / 4.0f, 0.0f);
+		blockTexCoords["1_2"] = glm::vec2(0.0f / 4.0f, 0.0f);
+		blockTexCoords["1_3"] = glm::vec2(2.0f / 4.0f, 0.0f);
+		blockTexCoords["1_4"] = glm::vec2(1.0f / 4.0f, 0.0f);
+		blockTexCoords["1_5"] = glm::vec2(1.0f / 4.0f, 0.0f);
 		
 		// DIRT
-		blockTexCoords["2_0"] = glm::vec2(2.0f / 3.0f, 0.0f);
-		blockTexCoords["2_1"] = glm::vec2(2.0f / 3.0f, 0.0f);
-		blockTexCoords["2_2"] = glm::vec2(2.0f / 3.0f, 0.0f);
-		blockTexCoords["2_3"] = glm::vec2(2.0f / 3.0f, 0.0f);
-		blockTexCoords["2_4"] = glm::vec2(2.0f / 3.0f, 0.0f);
-		blockTexCoords["2_5"] = glm::vec2(2.0f / 3.0f, 0.0f);
+		blockTexCoords["2_0"] = glm::vec2(2.0f / 4.0f, 0.0f);
+		blockTexCoords["2_1"] = glm::vec2(2.0f / 4.0f, 0.0f);
+		blockTexCoords["2_2"] = glm::vec2(2.0f / 4.0f, 0.0f);
+		blockTexCoords["2_3"] = glm::vec2(2.0f / 4.0f, 0.0f);
+		blockTexCoords["2_4"] = glm::vec2(2.0f / 4.0f, 0.0f);
+		blockTexCoords["2_5"] = glm::vec2(2.0f / 4.0f, 0.0f);
+
+		// TEST
+		blockTexCoords["3_0"] = glm::vec2(3.0f / 4.0f, 0.0f);
+		blockTexCoords["3_1"] = glm::vec2(3.0f / 4.0f, 0.0f);
+		blockTexCoords["3_2"] = glm::vec2(3.0f / 4.0f, 0.0f);
+		blockTexCoords["3_3"] = glm::vec2(3.0f / 4.0f, 0.0f);
+		blockTexCoords["3_4"] = glm::vec2(3.0f / 4.0f, 0.0f);
+		blockTexCoords["3_5"] = glm::vec2(3.0f / 4.0f, 0.0f);
 	}
 };

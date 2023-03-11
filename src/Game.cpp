@@ -129,7 +129,7 @@ void Game::loadShaders(int screenWidth, int screenHeight) {
 	glm::mat4 offsetTransform = glm::make_mat4(offsetArray);
 	GLint offsetTransformLoc = glGetUniformLocation(blockShader.getProgram(), "offsetTransform");
 	glUniformMatrix4fv(offsetTransformLoc, 1, GL_FALSE, glm::value_ptr(offsetTransform));
-	glUniform2f(glGetUniformLocation(blockShader.getProgram(), "texDim"), 3, 1);
+	glUniform2f(glGetUniformLocation(blockShader.getProgram(), "texDim"), 4, 1);
 
 	// Directional Light
 	GLint lightDirLoc = glGetUniformLocation(blockShader.getProgram(), "dirLight.direction");

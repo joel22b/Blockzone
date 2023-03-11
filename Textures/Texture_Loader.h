@@ -34,6 +34,11 @@ public:
         unsigned char* image;
 
         image = SOIL_load_image(path, &textureWidth, &textureHeight, 0, SOIL_LOAD_RGBA);
+        if (image == NULL) {
+            LOG(WARN, "Failed to load texture from disk: \"" + textureName + "\" from path: " + path);
+            return;
+        }
+
         glBindTexture(GL_TEXTURE_2D, textureMap);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -44,6 +49,8 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
         this->loadedTextures.insert(make_pair(textureName, textureMap));
+
+        LOG(INFO, "Loaded texture: \"" + textureName + "\" from path: " + path);
 	}
 
     GLuint getTextureId(std::string textureName) {
