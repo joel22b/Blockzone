@@ -13,7 +13,7 @@
 #include "Camera.h"
 #include "../Shaders/Shader.h"
 #include "world/World.h"
-#include "../Textures/Texture_Loader.h"
+#include "utils/Texture_Loader.h"
 #include "Text.h"
 
 #include "entity/player/Player.h"

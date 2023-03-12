@@ -12,7 +12,7 @@
 #include "Chunk.h"
 #include "Chunk_Consts.h"
 #include "block/Block_Consts.h"
-#include "../../Textures/Texture_Loader.h"
+#include "../utils/Texture_Loader.h"
 
 class World {
 public:
