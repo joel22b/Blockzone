@@ -6,10 +6,9 @@
 Game::Game(int screenWidth, int screenHeight) {
 	LOG(INFO, "Creating Game instance");
 
-	loadShaders(screenWidth, screenHeight);
-
 	textureLoader = new Texture_Loader();
-	loadTextures();
+
+	loadShaders(screenWidth, screenHeight);
 
 	world = new World(textureLoader);
 
@@ -119,6 +118,8 @@ void Game::mouseCallback(GLFWwindow* window, double xPos, double yPos) {
 }
 
 void Game::loadShaders(int screenWidth, int screenHeight) {
+	// TODO: make this modular so multiple shaders can be used
+	// Load block shader
 	blockShader = Shader("Shaders\\block.vert", "Shaders\\block.frag", "Shaders\\block.geom");
 
 	blockShader.Use();
@@ -129,7 +130,10 @@ void Game::loadShaders(int screenWidth, int screenHeight) {
 	glm::mat4 offsetTransform = glm::make_mat4(offsetArray);
 	GLint offsetTransformLoc = glGetUniformLocation(blockShader.getProgram(), "offsetTransform");
 	glUniformMatrix4fv(offsetTransformLoc, 1, GL_FALSE, glm::value_ptr(offsetTransform));
-	glUniform2f(glGetUniformLocation(blockShader.getProgram(), "texDim"), 4, 1);
+	
+	// Set the tile dimensions for this shader
+	std::pair<int, int> tileDims = textureLoader->getTextureTileDimensions("blocks");
+	glUniform2f(glGetUniformLocation(blockShader.getProgram(), "texDim"), tileDims.first, tileDims.second);
 
 	// Directional Light
 	GLint lightDirLoc = glGetUniformLocation(blockShader.getProgram(), "dirLight.direction");
@@ -139,15 +143,6 @@ void Game::loadShaders(int screenWidth, int screenHeight) {
 	glUniform3f(glGetUniformLocation(blockShader.getProgram(), "dirLight.specular"), 1.0f, 1.0f, 1.0f);
 
 	updateProjection(45.0f, screenWidth, screenHeight);
-}
-
-void Game::loadTextures() {
-	// Error texture
-	textureLoader->loadTexture("error", "Textures/error.png");
-
-	// Block Textures
-	textureLoader->loadTexture("blocks_diffuse", "Textures/blocks_diffuse.png");
-	textureLoader->loadTexture("blocks_specular", "Textures/blocks_specular.png");
 }
 
 void Game::updateProjection(GLfloat fov, int screenWidth, int screenHeight) {

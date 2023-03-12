@@ -7,7 +7,7 @@
 #include "glm/glm.hpp"
 
 #include "../../Mesh.h"
-#include "../../../Textures/Texture_Loader.h"
+#include "../../utils/Texture_Loader.h"
 
 enum Block_Type {
 	AIR = 0,

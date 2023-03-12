@@ -11,7 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Shaders/Shader.h"
-#include "../Textures/Texture_Loader.h"
+#include "utils/Texture_Loader.h"
 
 using namespace std;
 

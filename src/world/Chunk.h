@@ -15,7 +15,7 @@
 #include "Chunk_Consts.h"
 #include "../Chunk_Mesh.h"
 #include "block/Block.h"
-#include "../../Textures/Texture_Loader.h"
+#include "../utils/Texture_Loader.h"
 
 class Chunk {
 private:
