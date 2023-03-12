@@ -34,8 +34,10 @@ void Chunk::doUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk
 		Chunk_Mesh* oldChunkMesh = chunkMesh;
 		chunkMesh = newChunkMesh;
 		delete oldChunkMesh;
+		LOG(DEBUG, "Switched over");
 	}
 	else {
+		LOG(DEBUG, "Created fresh");
 		chunkMesh = newChunkMesh;
 	}
 	this->render = true;
@@ -49,6 +51,7 @@ void Chunk::doPartialUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS
 		doUpdate(chunkXPOS, chunkXNEG, chunkZPOS, chunkZNEG);
 	}
 	else {
+		LOG(DEBUG, "Created fresh partial");
 		std::vector<Block_Face> blockFaces = calculateMesh(chunkXPOS, chunkXNEG, chunkZPOS, chunkZNEG);
 		chunkMesh->updateVertices(blockFaces);
 	}
@@ -157,10 +160,6 @@ std::vector<Block_Face> Chunk::calculateMesh(Chunk* chunkXPOS, Chunk* chunkXNEG,
 	}
 
 	return blockFaces;
-}
-
-Chunk_Mesh* Chunk::getChunkMesh() {
-	return chunkMesh;
 }
 
 void Chunk::doRender(Shader shader, GLuint modelLoc) {

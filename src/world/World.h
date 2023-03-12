@@ -47,11 +47,10 @@ private:
 	void generateChunk(Chunk* chunk);
 	void loadChunk(Chunk* chunk);
 	void saveChunk(Chunk* chunk);
-	void updateChunkNoOffset(int xPos, int zPos);
-	void updateChunkNoOffset(Chunk* chunk);
+	void updateChunkNoOffset(Chunk** chunkArray, int xPos, int zPos);
 
 	Chunk* getChunk(int xPos, int zPos);
-	Chunk* getChunkNoOffset(int xPos, int zPos);
+	Chunk* getChunkNoOffset(Chunk** chunkArray, int xPos, int zPos);
 
 	inline bool fileExists(const std::string& name);
 

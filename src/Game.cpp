@@ -14,7 +14,7 @@ Game::Game(int screenWidth, int screenHeight) {
 
 	player = new Player(world, glm::vec3(8.0f, 20.0f, 8.0f), glm::vec3(1, 2, 1));
 
-	world->updateChunkRenderDistance(2, 1, player->getX(), player->getZ());
+	world->updateChunkRenderDistance(2, 0, player->getX(), player->getZ());
 
 	LOG(INFO, "Finished creating Game instance");
 }
