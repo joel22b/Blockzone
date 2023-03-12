@@ -30,6 +30,11 @@ void World::doRender(Shader shader, GLint modelLoc) {
 				if (chunks[i]->shouldRender()) {
 					chunks[i]->doRender(shader, modelLoc);
 				}
+				else {
+					//std::ostringstream msg;
+					//msg << "Render flag set to false for i=" << i;
+					//LOG(DEBUG, msg.str());
+				}
 			}
 			else {
 				std::ostringstream msg;
@@ -51,24 +56,20 @@ Chunk* World::getChunk(int xPos, int zPos) {
 	return chunks[(x * chunksLength) + z];
 }
 
-Chunk* World::getChunkNoOffset(int xPos, int zPos) {
+Chunk* World::getChunkNoOffset(Chunk** chunkArray, int xPos, int zPos) {
 	if (xPos < 0 || xPos >= chunksLength || zPos < 0 || zPos >= chunksLength) {
 		return nullptr;
 	}
 
-	return chunks[(xPos * chunksLength) + zPos];
+	return chunkArray[(xPos * chunksLength) + zPos];
 }
 
 Chunk* World::getChunkByCoords(int xPos, int zPos) {
-	int x = (xPos >= 0) ? xPos / CHUNK_MAX_WIDTH : (xPos / CHUNK_MAX_WIDTH) - 1;
-	int z = (zPos >= 0) ? zPos / CHUNK_MAX_WIDTH : (zPos / CHUNK_MAX_WIDTH) - 1;
-	return getChunk(x, z);
+	return getChunk(toChunkCoords(xPos), toChunkCoords(zPos));
 }
 
 glm::vec2 World::getChunkCoords(int xPos, int zPos) {
-	int x = (xPos >= 0) ? xPos / CHUNK_MAX_WIDTH : (xPos / CHUNK_MAX_WIDTH) - 1;
-	int z = (zPos >= 0) ? zPos / CHUNK_MAX_WIDTH : (zPos / CHUNK_MAX_WIDTH) - 1;
-	return glm::vec2(x, z);
+	return glm::vec2(toChunkCoords(xPos), toChunkCoords(zPos));
 }
 
 Block* World::getBlock(int xPos, int yPos, int zPos) {
@@ -194,8 +195,8 @@ inline bool World::fileExists(const std::string& name) {
 	return (stat(name.c_str(), &buffer) == 0);
 }
 
-void World::updateChunkNoOffset(int xPos, int zPos) {
-	Chunk* chunk = getChunkNoOffset(xPos, zPos);
+void World::updateChunkNoOffset(Chunk** chunkArray, int xPos, int zPos) {
+	Chunk* chunk = getChunkNoOffset(chunkArray, xPos, zPos);
 
 	if (chunk == nullptr) {
 		std::ostringstream msg;
@@ -204,27 +205,14 @@ void World::updateChunkNoOffset(int xPos, int zPos) {
 		return;
 	}
 
-	chunk->doUpdate((xPos < chunksLength - 1) ? getChunkNoOffset(xPos + 1, zPos) : nullptr,
-		(xPos > 0) ? getChunkNoOffset(xPos - 1, zPos) : nullptr,
-		(zPos < chunksLength - 1) ? getChunkNoOffset(xPos, zPos + 1) : nullptr,
-		(zPos > 0) ? getChunkNoOffset(xPos, zPos - 1) : nullptr);
-}
+	std::ostringstream msg;
+		msg << "Updating chunk x=" << xPos << " z=" << zPos;
+		LOG(DEBUG, msg.str());
 
-void World::updateChunkNoOffset(Chunk* chunk) {
-	int xPos = chunk->getChunkXPos();
-	int zPos = chunk->getChunkZPos();
-
-	if (chunk == nullptr) {
-		std::ostringstream msg;
-		msg << "Failed to update chunk x=" << xPos << " z=" << zPos;
-		LOG(WARN, msg.str());
-		return;
-	}
-
-	chunk->doUpdate((xPos < chunksLength - 1) ? getChunkNoOffset(xPos + 1, zPos) : nullptr,
-		(xPos > 0) ? getChunkNoOffset(xPos - 1, zPos) : nullptr,
-		(zPos < chunksLength - 1) ? getChunkNoOffset(xPos, zPos + 1) : nullptr,
-		(zPos > 0) ? getChunkNoOffset(xPos, zPos - 1) : nullptr);
+	chunk->doPartialUpdate((xPos < chunksLength - 1) ? getChunkNoOffset(chunkArray, xPos + 1, zPos) : nullptr,
+		(xPos > 0) ? getChunkNoOffset(chunkArray, xPos - 1, zPos) : nullptr,
+		(zPos < chunksLength - 1) ? getChunkNoOffset(chunkArray, xPos, zPos + 1) : nullptr,
+		(zPos > 0) ? getChunkNoOffset(chunkArray, xPos, zPos - 1) : nullptr);
 }
 
 void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
@@ -276,6 +264,7 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 					int chunkZ = i % chunksLength - chunkZOffsetNew;
 					chunksTemp[i] = new Chunk(blockConsts, chunkX, chunkZ);
 					loadChunk(chunksTemp[i]);
+					updateChunkNoOffset(chunksTemp, chunkX + chunkXOffsetNew, chunkZ + chunkZOffsetNew);
 				}
 			}
 		}
@@ -310,6 +299,7 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 					int chunkZ = i % chunksLength - chunkZOffsetNew;
 					chunksTemp[i] = new Chunk(blockConsts, chunkX, chunkZ);
 					loadChunk(chunksTemp[i]);
+					updateChunkNoOffset(chunksTemp, chunkX + chunkXOffsetNew, chunkZ + chunkZOffsetNew);
 				}
 			}
 		}
@@ -352,6 +342,7 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 					Chunk* chunk = new Chunk(blockConsts, chunkX, chunkZ);
 					loadChunk(chunk);
 					chunksTemp[i] = chunk;
+					updateChunkNoOffset(chunksTemp, chunkX + chunkXOffsetNew, chunkZ + chunkZOffsetNew);
 				}
 			}
 		}
@@ -387,31 +378,40 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 					Chunk* chunk = new Chunk(blockConsts, chunkX, chunkZ);
 					loadChunk(chunk);
 					chunksTemp[i] = chunk;
+					updateChunkNoOffset(chunksTemp, chunkX + chunkXOffsetNew, chunkZ + chunkZOffsetNew);
 				}
 			}
 		}
 	}
 
 	// Update the chunks
-	for (int x = 0; x < chunksLength; x++) {
-		for (int z = 0; z < chunksLength; z++) {
-			if (x >= bufferDistance && x < chunksLength - bufferDistance && z >= bufferDistance && z < chunksLength - bufferDistance) {
+	//for (int x = 0; x < chunksLength; x++) {
+	//	for (int z = 0; z < chunksLength; z++) {
+	//		if (x >= bufferDistance && x < chunksLength - bufferDistance && z >= bufferDistance && z < chunksLength - bufferDistance) {
 				// These are chunks to be rendered
-				Chunk* chunk = chunksTemp[(x * chunksLength) + z];
-				if (!chunk->shouldRender()) {
+				//Chunk* chunk = chunksTemp[(x * chunksLength) + z];
+				//if (!chunk->shouldRender()) {
 					// Update chunk
-					chunk->doPartialUpdate((x < chunksLength - 1) ? chunksTemp[((x + 1) * chunksLength) + z] : nullptr,
+					
+					/*chunk->doUpdate((x < chunksLength - 1) ? chunksTemp[((x + 1) * chunksLength) + z] : nullptr,
 						(x > 0) ? chunksTemp[((x - 1) * chunksLength) + z] : nullptr,
 						(z < chunksLength - 1) ? chunksTemp[(x * chunksLength) + z + 1] : nullptr,
-						(z > 0) ? chunksTemp[(x * chunksLength) + z - 1] : nullptr);
-				}
-			}
-			else {
+						(z > 0) ? chunksTemp[(x * chunksLength) + z - 1] : nullptr);*/
+				//}
+				/*std:ostringstream log;
+				log << "Do partial updating chunk x=" << x << " z=" << z;
+				LOG(DEBUG, log.str());
+				chunk->doPartialUpdate((x < chunksLength - 1) ? chunksTemp[((x + 1) * chunksLength) + z] : nullptr,
+						(x > 0) ? chunksTemp[((x - 1) * chunksLength) + z] : nullptr,
+						(z < chunksLength - 1) ? chunksTemp[(x * chunksLength) + z + 1] : nullptr,
+						(z > 0) ? chunksTemp[(x * chunksLength) + z - 1] : nullptr);*/
+	//		}
+	//		else {
 				// These are buffer chunks
-				chunksTemp[(x * chunksLength) + z]->setRender(false);
-			}
-		}
-	}
+	//			chunksTemp[(x * chunksLength) + z]->setRender(false);
+	//		}
+	//	}
+	//}
 
 	LOG(DEBUG, "Done generating new chunks array, entering crtical section");
 
@@ -440,8 +440,11 @@ void World::shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos) {
 void World::shiftChunks(int xPos, int zPos) {
 	LOG(DEBUG, "Shifting chunks");
 
-	std::thread threadShiftChunks(&World::shiftChunksThread, this, blockConsts, xPos, zPos);
-	threadShiftChunks.detach();
+	//std::thread threadShiftChunks(&World::shiftChunksThread, this, blockConsts, xPos, zPos);
+	//threadShiftChunks.detach();
+	//shiftChunksThread(blockConsts, xPos, zPos);
+
+	updateChunkRenderDistance(2, 0, xPos, zPos);
 }
 
 void World::updateChunkRenderDistance(int renderDistance, int bufferDistance, int xPos, int zPos) {
@@ -481,8 +484,24 @@ void World::updateChunkRenderDistance(int renderDistance, int bufferDistance, in
 	// Update the chunks
 	for (int i = bufferDistance; i <= (renderDistance * 2) + bufferDistance; i++) {
 		for (int j = bufferDistance; j <= (renderDistance * 2) + bufferDistance; j++) {
-			updateChunkNoOffset(i, j);
-			getChunkNoOffset(i, j)->setRender(true);
+			updateChunkNoOffset(chunks, i, j);
+			getChunkNoOffset(chunks, i, j)->setRender(true);
 		}
 	}
+}
+
+int World::toChunkCoords(int x) {
+	return (x >= 0) ? x / CHUNK_MAX_WIDTH : (x / CHUNK_MAX_WIDTH) - 1;
+}
+
+void World::doPartialChunkUpdate(int xPos, int zPos) {
+	int chunkX = toChunkCoords(xPos);
+	int chunkZ = toChunkCoords(zPos);
+
+	getChunk(chunkX, chunkZ)->doPartialUpdate(
+		getChunk(chunkX + 1, chunkZ),
+		getChunk(chunkX - 1, chunkZ),
+		getChunk(chunkX, chunkZ + 1),
+		getChunk(chunkX, chunkZ - 1)
+	);
 }

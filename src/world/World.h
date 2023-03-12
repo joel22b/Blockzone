@@ -12,7 +12,7 @@
 #include "Chunk.h"
 #include "Chunk_Consts.h"
 #include "block/Block_Consts.h"
-#include "../../Textures/Texture_Loader.h"
+#include "../utils/Texture_Loader.h"
 
 class World {
 public:
@@ -33,6 +33,8 @@ public:
 	void shiftChunksThread(Block_Consts* blockConsts, int xPos, int zPos);
 	void updateChunkRenderDistance(int renderDistance, int bufferDistance, int xPos, int zPos);
 
+	void doPartialChunkUpdate(int xPos, int zPos);
+
 private:
 	Chunk** chunks;
 	std::mutex chunksMutex;
@@ -45,11 +47,12 @@ private:
 	void generateChunk(Chunk* chunk);
 	void loadChunk(Chunk* chunk);
 	void saveChunk(Chunk* chunk);
-	void updateChunkNoOffset(int xPos, int zPos);
-	void updateChunkNoOffset(Chunk* chunk);
+	void updateChunkNoOffset(Chunk** chunkArray, int xPos, int zPos);
 
 	Chunk* getChunk(int xPos, int zPos);
-	Chunk* getChunkNoOffset(int xPos, int zPos);
+	Chunk* getChunkNoOffset(Chunk** chunkArray, int xPos, int zPos);
 
 	inline bool fileExists(const std::string& name);
+
+	int toChunkCoords(int x);
 };

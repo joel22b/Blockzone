@@ -9,19 +9,19 @@
 #include <sys/stat.h>
 
 #include "glm/glm.hpp"
+#include <glm/gtc/type_ptr.hpp>
 #include "glm/gtc/noise.hpp"
 
 #include "block/Block_Consts.h"
 #include "Chunk_Consts.h"
-#include "../Chunk_Mesh.h"
+#include "../mesh/Chunk_Mesh.h"
 #include "block/Block.h"
-#include "../../Textures/Texture_Loader.h"
+#include "../utils/Texture_Loader.h"
 
 class Chunk {
 private:
 	std::vector<std::vector<std::vector<Block>>> blocks;
 	Chunk_Mesh* chunkMesh = nullptr;
-	std::mutex chuckMeshMutex;
 	Block_Consts* blockConsts;
 	int xPos, zPos;
 	bool render, toDelete;
@@ -32,8 +32,6 @@ public:
 	Chunk();
 	Chunk(Block_Consts* blockConsts, int xPos, int zPos);
 	~Chunk();
-
-	Chunk_Mesh* getChunkMesh();
 
 	void doUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG);
 	void doPartialUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG);

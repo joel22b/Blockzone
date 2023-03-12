@@ -14,6 +14,7 @@ Chunk::Chunk(Block_Consts* blockConsts, int xPos, int zPos) {
 	this->zPos = zPos;
 	this->render = false;
 	this->toDelete = false;
+	this->chunkMesh = nullptr;
 }
 
 Chunk::~Chunk() {
@@ -27,37 +28,34 @@ void Chunk::doUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk
 	std::vector<Texture> blockTextures = blockConsts->getBlockTextures();
 	std::vector<Block_Face> blockFaces = calculateMesh(chunkXPOS, chunkXNEG, chunkZPOS, chunkZNEG);
 
-	chuckMeshMutex.lock();
 	this->render = false;
 	Chunk_Mesh* newChunkMesh = new Chunk_Mesh(blockFaces, blockTextures);
 	if (chunkMesh != nullptr) {
 		Chunk_Mesh* oldChunkMesh = chunkMesh;
 		chunkMesh = newChunkMesh;
 		delete oldChunkMesh;
+		LOG(DEBUG, "Switched over");
 	}
 	else {
+		LOG(DEBUG, "Created fresh");
 		chunkMesh = newChunkMesh;
 	}
 	this->render = true;
-	chuckMeshMutex.unlock();
+
+	LOG(DEBUG, "Updated chunk");
 }
 
 void Chunk::doPartialUpdate(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG) {
-	std::vector<Block_Face> blockFaces = calculateMesh(chunkXPOS, chunkXNEG, chunkZPOS, chunkZNEG);
-
-	chuckMeshMutex.lock();
 	this->render = false;
-	Chunk_Mesh* newChunkMesh = new Chunk_Mesh(blockFaces);
-	if (chunkMesh != nullptr) {
-		Chunk_Mesh* oldChunkMesh = chunkMesh;
-		chunkMesh = newChunkMesh;
-		delete oldChunkMesh;
+	if (chunkMesh == nullptr) {
+		doUpdate(chunkXPOS, chunkXNEG, chunkZPOS, chunkZNEG);
 	}
 	else {
-		chunkMesh = newChunkMesh;
+		LOG(DEBUG, "Created fresh partial");
+		std::vector<Block_Face> blockFaces = calculateMesh(chunkXPOS, chunkXNEG, chunkZPOS, chunkZNEG);
+		chunkMesh->updateVertices(blockFaces);
 	}
 	this->render = true;
-	chuckMeshMutex.unlock();
 }
 
 std::vector<Block_Face> Chunk::calculateMesh(Chunk* chunkXPOS, Chunk* chunkXNEG, Chunk* chunkZPOS, Chunk* chunkZNEG) {
@@ -164,16 +162,8 @@ std::vector<Block_Face> Chunk::calculateMesh(Chunk* chunkXPOS, Chunk* chunkXNEG,
 	return blockFaces;
 }
 
-Chunk_Mesh* Chunk::getChunkMesh() {
-	return chunkMesh;
-}
-
 void Chunk::doRender(Shader shader, GLuint modelLoc) {
-	chuckMeshMutex.lock();
 	if (chunkMesh != nullptr) {
-		if (!chunkMesh->ready()) {
-			chunkMesh->doSetup(blockConsts->getBlockTextures());
-		}
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(glm::translate(glm::mat4(1), glm::vec3(xPos * CHUNK_MAX_WIDTH, 0, zPos * CHUNK_MAX_WIDTH))));
 		chunkMesh->doRender(shader);
 	}
@@ -182,13 +172,10 @@ void Chunk::doRender(Shader shader, GLuint modelLoc) {
 		msg << "No chunk mesh x=" << xPos << " z=" << zPos;
 		LOG(WARN, msg.str());
 	}
-	chuckMeshMutex.unlock();
 }
 
 bool Chunk::shouldRender() {
-	//chuckMeshMutex.lock();
 	return this->render && chunkMesh != nullptr;
-	//chuckMeshMutex.unlock();
 }
 
 void Chunk::setRender(bool render) {

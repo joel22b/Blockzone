@@ -101,6 +101,11 @@ void Entity::doUpdate(GLfloat deltaTime) {
 					velocity.z = 0.0f;
 				}
 			}
+
+			if (collided && block->getType() != TEST) {
+				block->setType(TEST);
+				world->doPartialChunkUpdate(posInt.x + collisionPosFaces[i].x, posInt.z + collisionPosFaces[i].z);
+			}
 		}
 	}
 
